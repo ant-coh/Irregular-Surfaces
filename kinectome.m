@@ -50,8 +50,8 @@ for p=1:nbp
         nbm=size(k_antpos,1);
         weig_deg=[nbm,2];                                                   % weighted degree of nodes
         for node=1:nbm
-            weig_deg(node,1)=sum(abs(Kinect{c,p}{end-1,1}(node,:)))-1;
-            weig_deg(node,2)=sum(abs(Kinect{c,p}{end-1,2}(node,:)))-1;
+            weig_deg(node,1)=(sum(abs(Kinect{c,p}{end-1,1}(node,:)))-1)/nbm;
+            weig_deg(node,2)=(sum(abs(Kinect{c,p}{end-1,2}(node,:)))-1)/nbm;
         end
         WD{c,p}=weig_deg;
     end
