@@ -16,6 +16,7 @@ nbe=10;                                                                     % No
 ang={'LHipAngles' 'LKneeAngles' 'LAnkleAngles' 'LThoraxAngles' 'LSpineAngles' 'LPelvisAngles';...
     'RHipAngles' 'RKneeAngles' 'RAnkleAngles' 'RThoraxAngles' 'RSpineAngles' 'RPelvisAngles'};
 % 3 angles pour chaque articulation : Flex/Ext, Add/Abs, Rot
+%                                 ou Fwd tilt, Lat tilt, Rot
 
 % -------------------------------------------------------------------------
 K=cell(6,nbp);
