@@ -41,16 +41,23 @@ for p=2:nbp
             HSr=round(events.Right_Foot_Strike*100-start);
             HSl(HSl<=0)=1;                                                  % Au cas où HS1 est avant ou coïncide avec la première frame
             HSr(HSr<=0)=1;
+            if length(HSr)<2 || length(HSl)<2
+                continue
+            end
             HSmin=[min(HSl);min(HSr)];
             [~,HSind]=min(HSmin);                                           % Côté du premier HS (1 : gauche, 2 : droite)
-            nbc=min(length(HSl),length(HSr))-1;                             % Nombre de cycles complets
+            nbc=length(HSl)+length(HSr)-3;                                  % Nombre de cycles complets (1 cycles = 2 HS de chaque côté)
             for cy=1:nbc                                                    % ⚠ Ici un cycle complet comprend un cycle de chaque jambe
                 mm=[];
                 for m=1:length(mark)
-                    if HSind==1
-                        vm=markers.(mark{m})(HSl(cy):HSr(cy+1),1:2);        % Directions X et Y, médiolatérale et anteropostérieure
-                    else
-                        vm=markers.(mark{m})(HSr(cy):HSl(cy+1),1:2);
+                    if HSind==1 && mod(cy,2)==1                             % Directions médiolatérale et anteropostérieure
+                        vm=markers.(mark{m})(HSl(cy-floor(cy/2)):HSr(cy-floor(cy/2)+1),1:2);
+                    elseif HSind==1 && mod(cy,2)==0
+                        vm=markers.(mark{m})(HSr(cy/2):HSl(cy/2+2),1:2);    % Les cycles se chevauchent pour éviter une asymétrie des accélérations
+                    elseif HSind==2 && mod(cy,2)==1                         % (Si un cycle commence du côté gauche, les phases de ce côté seront :
+                        vm=markers.(mark{m})(HSr(cy-floor(cy/2)):HSl(cy-floor(cy/2)+1),1:2); % stance swing stance, et du côté droit, swing stance swing.
+                    else                                                    % Alterner le côté de départ corrige ce pb. Par contre, les cycles de début
+                        vm=markers.(mark{m})(HSl(cy/2):HSr(cy/2+2),1:2);    % et de fin ont moins de poids dans le calcul du kinectome moyen.
                     end
                     if vm(1,1)==0 || vm(end,1)==0
                         vm=zeros(length(vm),2);                             % Position du marqueur à zéro s'il manque une partie du cycle
