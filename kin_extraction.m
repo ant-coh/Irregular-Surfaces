@@ -10,7 +10,7 @@ close all;
 % -------------------------------------------------------------------------
 
 addpath('.\btk');
-nbp=64;                                                                     % Nombre de participants
+nbp=70;                                                                     % Nombre de participants
 cond={'Plat' 'Medium' 'High'};
 nbe=10;                                                                     % Nombre d'essais
 ang={'LHipAngles' 'LKneeAngles' 'LAnkleAngles' 'LThoraxAngles' 'LSpineAngles' 'LPelvisAngles';...
@@ -19,14 +19,24 @@ ang={'LHipAngles' 'LKneeAngles' 'LAnkleAngles' 'LThoraxAngles' 'LSpineAngles' 'L
 %                                 ou Fwd tilt, Lat tilt, Rot
 
 % -------------------------------------------------------------------------
-K=cell(6,nbp);
-% 6 Lignes : Gauche ('Plat' 'Medium' 'High'), Droite ('Plat' 'Medium' 'High')
+if exist('K.mat','file')==2
+    load K.mat
+    nbpk=size(K,2);
+    if nbpk<nbp
+        K=[K cell(6,nbp-nbpk)];
+    end
+else
+    K=cell(6,nbp);
+    % 6 Lignes : Gauche ('Plat' 'Medium' 'High'), Droite ('Plat' 'Medium' 'High')
+end
 
 for p=2:nbp
     part=sprintf('CTL_%02d',p);
     disp(['Processing participant: ' part]);
     temp=[part '_Plat_01.c3d'];
-    if ~exist(temp,'file')
+    if ~isempty(K{1,p})
+        continue
+    elseif ~exist(temp,'file')
         continue
     end
     for c=1:length(cond)
