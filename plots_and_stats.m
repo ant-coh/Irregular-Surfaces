@@ -3,7 +3,7 @@
 
 %% Kinectomes
 
-p=14;
+p=4;
 load Kinect.mat
 figure
 tl=tiledlayout(2,3);
@@ -38,12 +38,12 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 %% Plot MARP ou DV trois cond
 
-paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
+paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
 idms=1;  % 1 : MARP, 0 : DP
-nbp=64;
 
 load PA_CRP.mat
 load participants.mat
+nbp=size(PA_CRP,2);
 
 cond=["Even" "Medium" "High"];
 group=["Adultes" "Adolescents" "Enfants" "Jeunes Enfants"];
@@ -126,11 +126,11 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 %% Post Hoc
 
 paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
-idms=0;  % 1 : MARP, 0 : DP
-nbp=64;
+idms=1;  % 1 : MARP, 0 : DP
 
 load PA_CRP.mat
 load participants.mat
+nbp=size(PA_CRP,2);
 
 cond=["Even" "Medium" "High"];
 group=["Adultes" "Adolescents" "Enfants" "Jeunes Enfants"];
@@ -241,3 +241,40 @@ else
     title(tl,"Post-Hoc tests - Ankle/Knee MARP",'FontWeight','bold')
 end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
+
+%% Plan de covariation
+
+p=4;
+c=1;
+
+load cov_pla.mat
+at=cov_pla{c,p}{3,1}(1,:);
+as=cov_pla{c,p}{3,1}(2,:);
+af=cov_pla{c,p}{3,1}(3,:);
+
+figure
+cms=colormap(nebula(100));
+scatter3(at,as,af,50,cms,'filled')
+xlabel("\theta thigh"); ylabel("\theta shank"); zlabel("\theta foot")
+hold on
+
+v1=cov_pla{c,p}{4,1}(:,1);
+v2=cov_pla{c,p}{4,1}(:,2);
+p0=[mean(at) mean(as) mean(af)];
+
+s_range=-ceil(abs(min(cov_pla{c,p}{5,1}(:,1)))/5)*5-5:5:ceil(max(cov_pla{c,p}{5,1}(:,1))/5)*5+5;
+t_range=-ceil(abs(min(cov_pla{c,p}{5,1}(:,2)))/5)*5-5:5:ceil(max(cov_pla{c,p}{5,1}(:,2))/5)*5+5;
+[s,t]=meshgrid(s_range,t_range);
+X=p0(1)+s*v1(1)+t*v2(1);
+Y=p0(2)+s*v1(2)+t*v2(2);
+Z=p0(3)+s*v1(3)+t*v2(3);
+surf(X,Y,Z,"FaceColor","none","EdgeColor",[.3 .3 .3]);
+xlim([min(min(X,[],"all"),min(at)) max(max(X,[],"all"),max(at))])
+ylim([min(min(Y,[],"all"),min(as)) max(max(Y,[],"all"),max(as))])
+zlim([min(min(Z,[],"all"),min(af)) max(max(Z,[],"all"),max(af))])
+ev1=mean(abs(cov_pla{c,p}{5,1}(:,1)));
+ev2=mean(abs(cov_pla{c,p}{5,1}(:,2)));
+q=quiver3(p0(1),p0(2),p0(3),v1(1)*ev1,v1(2)*ev1,v1(3)*ev1,'r','linewidth',2);
+q.MaxHeadSize=.5;
+q=quiver3(p0(1),p0(2),p0(3),v2(1)*ev2,v2(2)*ev2,v2(3)*ev2,'b','linewidth',2);
+q.MaxHeadSize=.5;
