@@ -142,8 +142,8 @@ for p=1:nbp
     end
     idg=participants{p,3};
     for c=1:3
-        CRPtemp(1,:)=PA_CRP{c,p}{end-idms,4}(paire,:);                         % jambe gauche
-        CRPtemp(2,:)=PA_CRP{c+3,p}{end-idms,4}(paire,:);                       % jambe droite
+        CRPtemp(1,:)=PA_CRP{c,p}{end-idms,4}(paire,:);                      % jambe gauche
+        CRPtemp(2,:)=PA_CRP{c+3,p}{end-idms,4}(paire,:);                    % jambe droite
         CRPmp{c,idg}(ind(c,idg),:)=mean(CRPtemp,1);
         ind(c,idg)=ind(c,idg)+1;
     end
@@ -160,43 +160,70 @@ figure
 tl=tiledlayout(3,4);
 c=[1 2 3];
 cpaire=nchoosek(c,2);
-cms=colormap(parula(3));
+cms=colormap(nebula(3));
+cms=brighten(cms,-.2);
 for i=1:3
     for g=1:4
         Y0=CRPmp{cpaire(i,1),g};
         Y1=CRPmp{cpaire(i,2),g};
-        bc=3;                                                               % bonferonni correction
+        bc=3;                                                               % Bonferonni correction
         t=spm1d.stats.ttest_paired(Y0,Y1); 
         ti=t.inference(0.05/bc,'two_tailed',true,'interp',true);            % CHECKER PARAMETRES
 
         nexttile
         hold on
-        nbclust=size(ti.clusters,2);
-        for j=1:nbclust
-            rectangle('Position',[ti.clusters{1,j}.endpoints(1,1) 0 ti.clusters{1,j}.endpoints(1,2)-ti.clusters{1,j}.endpoints(1,1) 180],'EdgeColor','none','FaceColor',[.9 .9 .9])
-        end
+        rect_color(ti,Y0,Y1)
+        % nbclust=size(ti.clusters,2);
+        % for j=1:nbclust
+        %     rectangle('Position',[ti.clusters{1,j}.endpoints(1,1) 0 ti.clusters{1,j}.endpoints(1,2)-ti.clusters{1,j}.endpoints(1,1) 180],'EdgeColor','none','FaceColor',[.9 .9 .9])
+        % end
         for k=1:2
             plot(CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',2.5)
             f=fill([1:1:100 100:-1:1],[(CRPm{cpaire(i,k),g}(1,:)+CRPm{cpaire(i,k),g}(2,:)) fliplr((CRPm{cpaire(i,k),g}(1,:)-CRPm{cpaire(i,k),g}(2,:)))],'c');
             f.FaceColor=cms(cpaire(i,k),:);
             f.EdgeColor='none';
-            f.FaceAlpha=0.2;
+            f.FaceAlpha=0.25;
         end
-        ylim([0 180])
-        legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','southwest')
+        if idms==1
+            ylim([0 180])
+            legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','southwest')
+        else
+            ylim([0 60])
+            legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','northeast')
+        end
         xlabel("% gait cycle")
         if g==1
-            ylabel("MARP (°)")
+            if idms==1
+                ylabel("MARP (°)")
+            else
+                ylabel("SD (°)")
+            end
         end
         if i==1
             title(group(1,g))
         end
     end
 end
-if paire==1
-    title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
+if exist('cms_d.mat','file')==2
+    load cms_d.mat cms_d
+    cms_d=brighten(cms_d,.4);
 else
+    cms_d=colormap(turbo(300));
+    cms_d=brighten(cms_d,.6);
+end
+colormap(cms_d);
+cb=colorbar;
+clim([0 3])
+cb.Layout.Tile='east';
+ylabel(cb,"Cohen's d",'FontSize',13)
+if paire==1 && idms==1
+    title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
+elseif paire==1 && idms==0
+    title(tl,"Post-Hoc tests - Knee/Hip DP",'FontWeight','bold')
+elseif paire==2 && idms==1
     title(tl,"Post-Hoc tests - Ankle/Knee MARP",'FontWeight','bold')
+elseif paire==2 && idms==0
+    title(tl,"Post-Hoc tests - Ankle/Knee DP",'FontWeight','bold')
 end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
@@ -209,7 +236,7 @@ for c=1:3
     for i=1:6
         Y0=CRPmp{c,gpaire(i,1)};
         Y1=CRPmp{c,gpaire(i,1)};
-        bc=6;                                                               % bonferonni correction
+        bc=6;                                                               % Bonferonni correction
         t=spm1d.stats.ttest2(Y0,Y1); 
         ti=t.inference(0.05/bc,'two_tailed',true,'interp',true);            % CHECKER PARAMETRES
 
@@ -226,8 +253,13 @@ for c=1:3
             f.EdgeColor='none';
             f.FaceAlpha=0.2;
         end
-        ylim([0 180])
-        legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','southwest')
+        if idms==1
+            ylim([0 180])
+            legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','southwest')
+        else
+            ylim([0 60])
+            legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','northeast')
+        end
         xlabel("% gait cycle")
         if i==1
             ylabel(cond(1,c),'FontWeight','bold')
@@ -235,10 +267,14 @@ for c=1:3
         ysecondarylabel("(°)")
     end
 end
-if paire==1
+if paire==1 && idms==1
     title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
-else
+elseif paire==1 && idms==0
+    title(tl,"Post-Hoc tests - Knee/Hip DP",'FontWeight','bold')
+elseif paire==2 && idms==1
     title(tl,"Post-Hoc tests - Ankle/Knee MARP",'FontWeight','bold')
+elseif paire==2 && idms==0
+    title(tl,"Post-Hoc tests - Ankle/Knee DP",'FontWeight','bold')
 end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
@@ -255,7 +291,7 @@ af=cov_pla{c,p}{3,1}(3,:);
 figure
 cms=colormap(nebula(100));
 scatter3(at,as,af,50,cms,'filled')
-xlabel("\theta thigh"); ylabel("\theta shank"); zlabel("\theta foot")
+xlabel("\theta thigh (°)"); ylabel("\theta shank (°)"); zlabel("\theta foot (°)")
 hold on
 
 v1=cov_pla{c,p}{4,1}(:,1);
@@ -278,3 +314,5 @@ q=quiver3(p0(1),p0(2),p0(3),v1(1)*ev1,v1(2)*ev1,v1(3)*ev1,'r','linewidth',2);
 q.MaxHeadSize=.5;
 q=quiver3(p0(1),p0(2),p0(3),v2(1)*ev2,v2(2)*ev2,v2(3)*ev2,'b','linewidth',2);
 q.MaxHeadSize=.5;
+title("Covariation plane of elevation angles")
+legend("","","PC1","PC2",Location="northeast")
