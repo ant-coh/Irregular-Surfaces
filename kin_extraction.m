@@ -14,7 +14,7 @@ nbp=70;                                                                     % No
 cond={'Plat' 'Medium' 'High'};
 nbe=10;                                                                     % Nombre d'essais
 ang={'LHipAngles' 'LKneeAngles' 'LAnkleAngles' 'LThoraxAngles' 'LSpineAngles' 'LPelvisAngles';...
-    'RHipAngles' 'RKneeAngles' 'RAnkleAngles' 'RThoraxAngles' 'RSpineAngles' 'RPelvisAngles'};
+     'RHipAngles' 'RKneeAngles' 'RAnkleAngles' 'RThoraxAngles' 'RSpineAngles' 'RPelvisAngles'};
 % 3 angles pour chaque articulation : Flex/Ext, Add/Abs, Rot
 %                                 ou Fwd tilt, Lat tilt, Rot
 
