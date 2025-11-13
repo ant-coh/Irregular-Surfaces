@@ -16,7 +16,16 @@ mark={'LFHD' 'RFHD' 'LBHD' 'RBHD' 'C7' 'T10' 'CLAV' 'STRN' 'RBAK' 'LSHO' 'LELB' 
 'LASI' 'RASI' 'LPSI' 'RPSI' 'LTHI' 'LKNE' 'LTIB' 'LANK' 'LHEE' 'LTOE' 'RTHI' 'RKNE' 'RTIB' 'RANK' 'RHEE' 'RTOE'};
 
 % -------------------------------------------------------------------------
-Acc=cell(3,nbp);                                                            % 3 Lignes ('Plat' 'Medium' 'High')
+
+if exist('Acc.mat','file')==2
+    load Acc.mat
+    nbpa=size(K,2);
+    if nbpa<nbp
+        Acc=[Acc cell(3,nbp-nbpa)];
+    end
+else
+    Acc=cell(3,nbp);                                                        % 3 Lignes ('Plat' 'Medium' 'High')
+end
 
 for p=2:nbp
     part=sprintf('CTL_%02d',p);
