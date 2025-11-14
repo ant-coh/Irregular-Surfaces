@@ -316,3 +316,40 @@ q=quiver3(p0(1),p0(2),p0(3),v2(1)*ev2,v2(2)*ev2,v2(3)*ev2,'b','linewidth',2);
 q.MaxHeadSize=.5;
 title("Covariation plane of elevation angles")
 legend("","","PC1","PC2",Location="northeast")
+
+%% Plan de covariation - u3t - 3 conditions
+
+p=4;
+
+load cov_pla.mat
+figure
+tl=tiledlayout(1,3);
+cms=colormap(nebula(100));
+cond=["Even" "Medium" "High"];
+
+for c=1:3
+    nexttile
+    at=cov_pla{c,p}{3,1}(1,:);
+    as=cov_pla{c,p}{3,1}(2,:);
+    af=cov_pla{c,p}{3,1}(3,:);
+    scatter3(at,as,af,50,cms,'filled')
+    xlabel("\theta thigh (°)"); ylabel("\theta shank (°)"); zlabel("\theta foot (°)")
+    hold on
+    v1=cov_pla{c,p}{4,1}(:,1);
+    v2=cov_pla{c,p}{4,1}(:,2);
+    p0=[mean(at) mean(as) mean(af)];
+    s_range=-ceil(abs(min(cov_pla{c,p}{5,1}(:,1)))/5)*5-5:5:ceil(max(cov_pla{c,p}{5,1}(:,1))/5)*5+5;
+    t_range=-ceil(abs(min(cov_pla{c,p}{5,1}(:,2)))/5)*5-5:5:ceil(max(cov_pla{c,p}{5,1}(:,2))/5)*5+5;
+    [s,t]=meshgrid(s_range,t_range);
+    X=p0(1)+s*v1(1)+t*v2(1);
+    Y=p0(2)+s*v1(2)+t*v2(2);
+    Z=p0(3)+s*v1(3)+t*v2(3);
+    surf(X,Y,Z,"FaceColor","none","EdgeColor",[.3 .3 .3]);
+    xlim([min(min(X,[],"all"),min(at)) max(max(X,[],"all"),max(at))])
+    ylim([min(min(Y,[],"all"),min(as)) max(max(Y,[],"all"),max(as))])
+    zlim([min(min(Z,[],"all"),min(af)) max(max(Z,[],"all"),max(af))])
+    title(cond(c))
+    view(-90,0)
+end
+title(tl,"Orientation of the covariation plane of elevation angles")
+tl.Padding = 'compact'; tl.TileSpacing = 'compact';
