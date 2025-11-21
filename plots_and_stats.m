@@ -125,12 +125,43 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 %% Post Hoc
 
-paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
+paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
 idms=1;  % 1 : MARP, 0 : DP
 
 load PA_CRP.mat
 load participants.mat
 nbp=size(PA_CRP,2);
+
+%--------------------------------------------------------------------------
+% 
+ind=1;
+idp=0;
+for p=1:nbp
+    if isempty(PA_CRP{1,p})
+        continue
+    end
+    idp=idp+1;
+    for c=1:3
+        crptmp=zeros(2,100);
+        crptmp(1,:)=PA_CRP{c,p}{end-1,4}(paire,:);
+        crptmp(2,:)=PA_CRP{c+3,p}{end-1,4}(paire,:);
+        Y(ind,:)=mean(crptmp,1);
+        A(ind,:)=participants{p,3};
+        B(ind,:)=c;
+        S(ind,:)=idp;
+        ind=ind+1;
+    end
+end
+% Pas de correction de sphéricité (equalvar dispo uniquement sur Python)
+spm=spm1d.stats.normality.anova2onerm(Y,A,B,S);                             % Normality tests on the residuals
+spmi=spm.inference(0.05);
+normality=~spmi.h0reject;
+
+subplot(131);  plot(Y', 'k');  hold on;  title('Data')
+subplot(132);  plot(spm.residuals', 'k');  title('Residuals')
+subplot(133);  spmi.plot();  title('Normality test')
+
+%--------------------------------------------------------------------------
 
 cond=["Even" "Medium" "High"];
 group=["Adultes" "Adolescents" "Enfants" "Jeunes Enfants"];
@@ -167,16 +198,23 @@ for i=1:3
         Y0=CRPmp{cpaire(i,1),g};
         Y1=CRPmp{cpaire(i,2),g};
         bc=3;                                                               % Bonferonni correction
-        t=spm1d.stats.ttest_paired(Y0,Y1); 
-        ti=t.inference(0.05/bc,'two_tailed',true,'interp',true);            % CHECKER PARAMETRES
+rng("shuffle")
+        if normality==1
+            t=spm1d.stats.ttest_paired(Y0,Y1); 
+            ti=t.inference(0.05/bc,'two_tailed',true,'interp',true);
+        else
+            t=spm1d.stats.nonparam.ttest_paired(Y0,Y1); 
+            ti=t.inference(0.05/bc,'two_tailed',true,'iterations',-1,'force_iterations',true);      % iterations : -1 for max iterations
+        end
+        % For non-parametric tests, a number of iterations smaller than the
+        % max may yield qualitatively different results, especially if the
+        % effect size is small. Here the max number of iterations is around
+        % 30 000, which is fine to run, but if this number was greater, we
+        % could fix iterations at 10 000
 
         nexttile
         hold on
-        rect_color(ti,Y0,Y1)
-        % nbclust=size(ti.clusters,2);
-        % for j=1:nbclust
-        %     rectangle('Position',[ti.clusters{1,j}.endpoints(1,1) 0 ti.clusters{1,j}.endpoints(1,2)-ti.clusters{1,j}.endpoints(1,1) 180],'EdgeColor','none','FaceColor',[.9 .9 .9])
-        % end
+        rect_color(ti,Y0,Y1,0)
         for k=1:2
             plot(CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',2.5)
             f=fill([1:1:100 100:-1:1],[(CRPm{cpaire(i,k),g}(1,:)+CRPm{cpaire(i,k),g}(2,:)) fliplr((CRPm{cpaire(i,k),g}(1,:)-CRPm{cpaire(i,k),g}(2,:)))],'c');
@@ -191,6 +229,8 @@ for i=1:3
             ylim([0 60])
             legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','northeast')
         end
+        box on
+        set(gca,'Layer','Top');
         xlabel("% gait cycle")
         if g==1
             if idms==1
@@ -237,15 +277,18 @@ for c=1:3
         Y0=CRPmp{c,gpaire(i,1)};
         Y1=CRPmp{c,gpaire(i,1)};
         bc=6;                                                               % Bonferonni correction
-        t=spm1d.stats.ttest2(Y0,Y1); 
-        ti=t.inference(0.05/bc,'two_tailed',true,'interp',true);            % CHECKER PARAMETRES
+
+        if normality==1
+            t=spm1d.stats.ttest_paired(Y0,Y1); 
+            ti=t.inference(0.05/bc,'two_tailed',true,'interp',true);
+        else
+            t=spm1d.stats.nonparam.ttest_paired(Y0,Y1); 
+            ti=t.inference(0.05/bc,'two_tailed',true,'iterations',-1,'force_iterations',true);
+        end
 
         nexttile
         hold on
-        nbclust=size(ti.clusters,2);
-        for j=1:nbclust
-            rectangle('Position',[ti.clusters{1,j}.endpoints(1,1) 0 ti.clusters{1,j}.endpoints(1,2)-ti.clusters{1,j}.endpoints(1,1) 180],'EdgeColor','none','FaceColor',[.9 .9 .9])
-        end
+        rect_color(ti,Y0,Y1,0)
         for k=1:2
             plot(CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',2.5)
             f=fill([1:1:100 100:-1:1],[(CRPm{c,gpaire(i,k)}(1,:)+CRPm{c,gpaire(i,k)}(2,:)) fliplr((CRPm{c,gpaire(i,k)}(1,:)-CRPm{c,gpaire(i,k)}(2,:)))],'c');
@@ -260,6 +303,8 @@ for c=1:3
             ylim([0 60])
             legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','northeast')
         end
+        box on
+        set(gca,'Layer','Top');
         xlabel("% gait cycle")
         if i==1
             ylabel(cond(1,c),'FontWeight','bold')
@@ -280,8 +325,8 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 %% Plan de covariation
 
-p=4;
-c=1;
+p=65;
+c=3;
 
 load cov_pla.mat
 at=cov_pla{c,p}{3,1}(1,:);
@@ -308,14 +353,15 @@ surf(X,Y,Z,"FaceColor","none","EdgeColor",[.3 .3 .3]);
 xlim([min(min(X,[],"all"),min(at)) max(max(X,[],"all"),max(at))])
 ylim([min(min(Y,[],"all"),min(as)) max(max(Y,[],"all"),max(as))])
 zlim([min(min(Z,[],"all"),min(af)) max(max(Z,[],"all"),max(af))])
-ev1=mean(abs(cov_pla{c,p}{5,1}(:,1)));
-ev2=mean(abs(cov_pla{c,p}{5,1}(:,2)));
-q=quiver3(p0(1),p0(2),p0(3),v1(1)*ev1,v1(2)*ev1,v1(3)*ev1,'r','linewidth',2);
+% ev1=mean(abs(cov_pla{c,p}{5,1}(:,1)));
+% ev2=mean(abs(cov_pla{c,p}{5,1}(:,2)));
+q=quiver3(p0(1),p0(2),p0(3),v1(1)*15,v1(2)*15,v1(3)*15,'r','linewidth',2);
 q.MaxHeadSize=.5;
-q=quiver3(p0(1),p0(2),p0(3),v2(1)*ev2,v2(2)*ev2,v2(3)*ev2,'b','linewidth',2);
+q=quiver3(p0(1),p0(2),p0(3),v2(1)*15,v2(2)*15,v2(3)*15,'b','linewidth',2);
 q.MaxHeadSize=.5;
 title("Covariation plane of elevation angles")
 legend("","","PC1","PC2",Location="northeast")
+box on
 
 %% Plan de covariation - u3t - 3 conditions
 
@@ -350,6 +396,7 @@ for c=1:3
     zlim([min(min(Z,[],"all"),min(af)) max(max(Z,[],"all"),max(af))])
     title(cond(c))
     view(-90,0)
+    box on
 end
 title(tl,"Orientation of the covariation plane of elevation angles")
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
