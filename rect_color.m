@@ -4,16 +4,24 @@ function rect_color(SPMi,Y0,Y1,varargin)
 % These rectangles are colored based on the mean Cohen's d of the cluster.
 
 if nargin==3
-    thres=5;
-else
+    thres=0;                                                                % Minimum length of displayed clusters
+    maxd=3;                                                                 % Maximum effect size displayed on the colorbar
+elseif nargin==4
     thres=varargin{1};
+    maxd=3;
+elseif nargin==5
+    thres=varargin{1};
+    maxd=varargin{2};
 end
 
 if exist('cms_d.mat','file')==2
     load cms_d.mat cms_d
     cms_d=brighten(cms_d,.4);
+    if maxd~=3
+        cms_d=interp1(1:300,cms_d,linspace(1,300,maxd*100),'spline');
+    end
 else
-    cms_d=colormap(turbo(300));                                             % 300 --> limit of "d" set at 3
+    cms_d=colormap(turbo(maxd*100));
     cms_d=brighten(cms_d,.8);
 end
 

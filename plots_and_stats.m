@@ -125,8 +125,9 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 %% Post Hoc
 
-paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
+paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
 idms=1;  % 1 : MARP, 0 : DP
+maxd=4;  % Max effect size displayed on colorbar
 
 load PA_CRP.mat
 load participants.mat
@@ -214,7 +215,7 @@ rng("shuffle")
 
         nexttile
         hold on
-        rect_color(ti,Y0,Y1,0)
+        rect_color(ti,Y0,Y1,0,maxd)
         for k=1:2
             plot(CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',2.5)
             f=fill([1:1:100 100:-1:1],[(CRPm{cpaire(i,k),g}(1,:)+CRPm{cpaire(i,k),g}(2,:)) fliplr((CRPm{cpaire(i,k),g}(1,:)-CRPm{cpaire(i,k),g}(2,:)))],'c');
@@ -247,13 +248,16 @@ end
 if exist('cms_d.mat','file')==2
     load cms_d.mat cms_d
     cms_d=brighten(cms_d,.4);
+    if maxd~=3
+        cms_d=interp1(1:300,cms_d,linspace(1,300,maxd*100),'spline');
+    end
 else
     cms_d=colormap(turbo(300));
     cms_d=brighten(cms_d,.6);
 end
 colormap(cms_d);
 cb=colorbar;
-clim([0 3])
+clim([0 maxd])
 cb.Layout.Tile='east';
 ylabel(cb,"Cohen's d",'FontSize',13)
 if paire==1 && idms==1
@@ -288,7 +292,7 @@ for c=1:3
 
         nexttile
         hold on
-        rect_color(ti,Y0,Y1,0)
+        rect_color(ti,Y0,Y1,0,maxd)
         for k=1:2
             plot(CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',2.5)
             f=fill([1:1:100 100:-1:1],[(CRPm{c,gpaire(i,k)}(1,:)+CRPm{c,gpaire(i,k)}(2,:)) fliplr((CRPm{c,gpaire(i,k)}(1,:)-CRPm{c,gpaire(i,k)}(2,:)))],'c');
@@ -312,6 +316,21 @@ for c=1:3
         ysecondarylabel("(°)")
     end
 end
+if exist('cms_d.mat','file')==2
+    load cms_d.mat cms_d
+    cms_d=brighten(cms_d,.4);
+    if maxd~=3
+        cms_d=interp1(1:300,cms_d,linspace(1,300,maxd*100),'spline');
+    end
+else
+    cms_d=colormap(turbo(300));
+    cms_d=brighten(cms_d,.6);
+end
+colormap(cms_d);
+cb=colorbar;
+clim([0 maxd])
+cb.Layout.Tile='east';
+ylabel(cb,"Cohen's d",'FontSize',13)
 if paire==1 && idms==1
     title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
 elseif paire==1 && idms==0
