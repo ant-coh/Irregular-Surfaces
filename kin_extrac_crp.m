@@ -38,6 +38,7 @@ for p=2:nbp
         continue
     end
     for c=1:length(cond)
+        disp(['Condition: ' cond{c}]);
         for j=1:2                                                           % Jambe g/d
             ind=1;
             for e=1:nbe
@@ -69,16 +70,15 @@ for p=2:nbp
                     if isempty(TOcy)
                         TOperc=0;
                     else
-                        TOperc=((TOcy-HS(cy))/(HS(cy+1)-HS(cy)))*100;         % Pourcentage Toe Off
+                        TOperc=((TOcy-HS(cy))/(HS(cy+1)-HS(cy)))*100;       % Pourcentage Toe Off
                     end
-                    disp(['TO : ' num2str(TOperc)])
+                    % disp(['TO : ' num2str(TOperc)])
                     K_crp{c+(j-1)*3,p}{ind,1}=ma;
                     K_crp{c+(j-1)*3,p}{ind,2}=TOperc;
                     ind=ind+1;
                 end
             end
         end
-        disp(['Condition: ' cond{c}]);
     end
 end
 
