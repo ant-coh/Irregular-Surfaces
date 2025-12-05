@@ -1,4 +1,4 @@
-
+  
 % Sections à run séparément
 
 %% Kinectomes
@@ -76,8 +76,8 @@ for i=1:3
     nexttile
     for j=1:4
         hold on
-        plot(CRPm{i,j}(1,:),'Color',cms(j,:),'LineWidth',2.5)
-        f=fill([1:1:100 100:-1:1],[(CRPm{i,j}(1,:)+CRPm{i,j}(2,:)) fliplr((CRPm{i,j}(1,:)-CRPm{i,j}(2,:)))],'c');
+        plot(0:1:100,CRPm{i,j}(1,:),'Color',cms(j,:),'LineWidth',2.5)
+        f=fill([0:1:100 100:-1:0],[(CRPm{i,j}(1,:)+CRPm{i,j}(2,:)) fliplr((CRPm{i,j}(1,:)-CRPm{i,j}(2,:)))],'c');
         f.FaceColor=cms(j,:);
         f.EdgeColor='none';
         f.FaceAlpha=0.2;
@@ -103,8 +103,8 @@ for j=1:4
     nexttile
     for i=1:3
         hold on
-        plot(CRPm{i,j}(1,:),'Color',cms(i,:),'LineWidth',2.5)
-        f=fill([1:1:100 100:-1:1],[(CRPm{i,j}(1,:)+CRPm{i,j}(2,:)) fliplr((CRPm{i,j}(1,:)-CRPm{i,j}(2,:)))],'c');
+        plot(0:1:100,CRPm{i,j}(1,:),'Color',cms(i,:),'LineWidth',2.5)
+        f=fill([0:1:100 100:-1:0],[(CRPm{i,j}(1,:)+CRPm{i,j}(2,:)) fliplr((CRPm{i,j}(1,:)-CRPm{i,j}(2,:)))],'c');
         f.FaceColor=cms(i,:);
         f.EdgeColor='none';
         f.FaceAlpha=0.2;
@@ -125,6 +125,7 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 %% Post Hoc
 
+clear
 paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
 idms=1;  % 1 : MARP, 0 : DP
 maxd=4;  % Max effect size displayed on colorbar
@@ -143,7 +144,7 @@ for p=1:nbp
     end
     idp=idp+1;
     for c=1:3
-        crptmp=zeros(2,100);
+        crptmp=zeros(2,101);
         crptmp(1,:)=PA_CRP{c,p}{end-1,4}(paire,:);
         crptmp(2,:)=PA_CRP{c+3,p}{end-1,4}(paire,:);
         Y(ind,:)=mean(crptmp,1);
@@ -217,8 +218,8 @@ rng("shuffle")
         hold on
         rect_color(ti,Y0,Y1,0,maxd)
         for k=1:2
-            plot(CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',2.5)
-            f=fill([1:1:100 100:-1:1],[(CRPm{cpaire(i,k),g}(1,:)+CRPm{cpaire(i,k),g}(2,:)) fliplr((CRPm{cpaire(i,k),g}(1,:)-CRPm{cpaire(i,k),g}(2,:)))],'c');
+            plot(0:1:100,CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',2.5)
+            f=fill([0:1:100 100:-1:0],[(CRPm{cpaire(i,k),g}(1,:)+CRPm{cpaire(i,k),g}(2,:)) fliplr((CRPm{cpaire(i,k),g}(1,:)-CRPm{cpaire(i,k),g}(2,:)))],'c');
             f.FaceColor=cms(cpaire(i,k),:);
             f.EdgeColor='none';
             f.FaceAlpha=0.25;
@@ -232,7 +233,9 @@ rng("shuffle")
         end
         box on
         set(gca,'Layer','Top');
-        xlabel("% gait cycle")
+        if i==3
+            xlabel("% gait cycle")
+        end
         if g==1
             if idms==1
                 ylabel("MARP (°)")
@@ -294,8 +297,8 @@ for c=1:3
         hold on
         rect_color(ti,Y0,Y1,0,maxd)
         for k=1:2
-            plot(CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',2.5)
-            f=fill([1:1:100 100:-1:1],[(CRPm{c,gpaire(i,k)}(1,:)+CRPm{c,gpaire(i,k)}(2,:)) fliplr((CRPm{c,gpaire(i,k)}(1,:)-CRPm{c,gpaire(i,k)}(2,:)))],'c');
+            plot(0:1:100,CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',2.5)
+            f=fill([0:1:100 100:-1:0],[(CRPm{c,gpaire(i,k)}(1,:)+CRPm{c,gpaire(i,k)}(2,:)) fliplr((CRPm{c,gpaire(i,k)}(1,:)-CRPm{c,gpaire(i,k)}(2,:)))],'c');
             f.FaceColor=cms(gpaire(i,k),:);
             f.EdgeColor='none';
             f.FaceAlpha=0.2;
@@ -309,7 +312,9 @@ for c=1:3
         end
         box on
         set(gca,'Layer','Top');
-        xlabel("% gait cycle")
+        if c==3
+            xlabel("% gait cycle")
+        end
         if i==1
             ylabel(cond(1,c),'FontWeight','bold')
         end
@@ -344,8 +349,8 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 %% Plan de covariation
 
-p=65;
-c=3;
+p=4;
+c=1;
 
 load cov_pla.mat
 at=cov_pla{c,p}{3,1}(1,:);
@@ -353,13 +358,14 @@ as=cov_pla{c,p}{3,1}(2,:);
 af=cov_pla{c,p}{3,1}(3,:);
 
 figure
-cms=colormap(nebula(100));
+cms=colormap(nebula(101));
 scatter3(at,as,af,50,cms,'filled')
 xlabel("\theta thigh (°)"); ylabel("\theta shank (°)"); zlabel("\theta foot (°)")
 hold on
 
 v1=cov_pla{c,p}{4,1}(:,1);
 v2=cov_pla{c,p}{4,1}(:,2);
+v3=cov_pla{c,p}{4,1}(:,3);
 p0=[mean(at) mean(as) mean(af)];
 
 s_range=-ceil(abs(min(cov_pla{c,p}{5,1}(:,1)))/5)*5-5:5:ceil(max(cov_pla{c,p}{5,1}(:,1))/5)*5+5;
@@ -372,24 +378,34 @@ surf(X,Y,Z,"FaceColor","none","EdgeColor",[.3 .3 .3]);
 xlim([min(min(X,[],"all"),min(at)) max(max(X,[],"all"),max(at))])
 ylim([min(min(Y,[],"all"),min(as)) max(max(Y,[],"all"),max(as))])
 zlim([min(min(Z,[],"all"),min(af)) max(max(Z,[],"all"),max(af))])
-% ev1=mean(abs(cov_pla{c,p}{5,1}(:,1)));
-% ev2=mean(abs(cov_pla{c,p}{5,1}(:,2)));
+
 q=quiver3(p0(1),p0(2),p0(3),v1(1)*15,v1(2)*15,v1(3)*15,'r','linewidth',2);
 q.MaxHeadSize=.5;
 q=quiver3(p0(1),p0(2),p0(3),v2(1)*15,v2(2)*15,v2(3)*15,'b','linewidth',2);
 q.MaxHeadSize=.5;
+q=quiver3(p0(1),p0(2),p0(3),v3(1)*15,v3(2)*15,v3(3)*15,'g','linewidth',2);
+q.MaxHeadSize=.5;
+
+q=quiver3(p0(1),p0(2),p0(3),-v1(1)*15,-v1(2)*15,-v1(3)*15,'r','linewidth',2);
+q.MaxHeadSize=.5;
+q=quiver3(p0(1),p0(2),p0(3),-v2(1)*15,-v2(2)*15,-v2(3)*15,'b','linewidth',2);
+q.MaxHeadSize=.5;
+q=quiver3(p0(1),p0(2),p0(3),-v3(1)*15,-v3(2)*15,-v3(3)*15,'g','linewidth',2);
+q.MaxHeadSize=.5;
+
 title("Covariation plane of elevation angles")
-legend("","","PC1","PC2",Location="northeast")
+legend("","","PC1","PC2","PC3",Location="northeast")
+axis square
 box on
 
 %% Plan de covariation - u3t - 3 conditions
 
-p=4;
+p=25;
 
 load cov_pla.mat
 figure
 tl=tiledlayout(1,3);
-cms=colormap(nebula(100));
+cms=colormap(nebula(101));
 cond=["Even" "Medium" "High"];
 
 for c=1:3
@@ -415,6 +431,7 @@ for c=1:3
     zlim([min(min(Z,[],"all"),min(af)) max(max(Z,[],"all"),max(af))])
     title(cond(c))
     view(-90,0)
+    axis square
     box on
 end
 title(tl,"Orientation of the covariation plane of elevation angles")

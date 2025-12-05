@@ -31,7 +31,7 @@ for p=1:nbp
                     PA_CRP{c+(j-1)*3,p}{cy,1}(a,:)=(PA(pad+1:end-pad,1))';
                 end
                 PAtemp=PA_CRP{c+(j-1)*3,p}{cy,1};
-                PAn=interp1(linspace(1,size(PAtemp,2),size(PAtemp,2)),PAtemp',linspace(1,size(PAtemp,2),100));
+                PAn=interp1(linspace(1,size(PAtemp,2),size(PAtemp,2)),PAtemp',linspace(1,size(PAtemp,2),101));
                 PA_CRP{c+(j-1)*3,p}{cy,2}=PAn';
                 if ~exist('PAm','var')
                     PAm=PAn';
@@ -44,7 +44,7 @@ for p=1:nbp
                 PA_CRP{c+(j-1)*3,p}{cy,3}(1,:)=HKcrp;
                 PA_CRP{c+(j-1)*3,p}{cy,3}(2,:)=KAcrp;
                 CRPtemp=PA_CRP{c+(j-1)*3,p}{cy,3};
-                CRPn=interp1(linspace(1,size(CRPtemp,2),size(CRPtemp,2)),CRPtemp',linspace(1,size(CRPtemp,2),100));
+                CRPn=interp1(linspace(1,size(CRPtemp,2),size(CRPtemp,2)),CRPtemp',linspace(1,size(CRPtemp,2),101));
                 PA_CRP{c+(j-1)*3,p}{cy,4}=CRPn';
                 if ~exist('CRPm','var')
                     CRPm=CRPn';

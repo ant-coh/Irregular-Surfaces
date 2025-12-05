@@ -80,7 +80,7 @@ for p=2:nbp
                     end
                     mm=[mm vm_acc];
                 end                                                         % Normalisation des cycles
-                mn=interp1(linspace(1,size(mm,1),size(mm,1)),mm,linspace(1,size(mm,1),100));
+                mn=interp1(linspace(1,size(mm,1),size(mm,1)),mm,linspace(1,size(mm,1),101));
                 ma=[ma mn'];                                                % Concaténation
             end
         end

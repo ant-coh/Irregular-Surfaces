@@ -27,15 +27,15 @@ end
 
 for c=1:SPMi.nClusters
 
-    b_inf=round(SPMi.clusters{1,c}.endpoints(1,1))+1;
-    b_sup=round(SPMi.clusters{1,c}.endpoints(1,2))+1;
+    b_inf=round(SPMi.clusters{1,c}.endpoints(1,1));
+    b_sup=round(SPMi.clusters{1,c}.endpoints(1,2));
     if b_sup-b_inf < thres
         continue
     end
     d=zeros(1,b_sup-b_inf+1);
     ind=1;
 
-    for b=b_inf:b_sup
+    for b=b_inf+1:b_sup+1
 
         mY0=mean(Y0(:,b));                                                  % Mean of the distribution
         sY0=std(Y0(:,b));                                                   % Standard deviation

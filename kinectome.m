@@ -23,9 +23,9 @@ for p=1:nbp
         continue
     end
     for c=1:3
-        nbc=size(Acc{c,p},2)/100;
+        nbc=size(Acc{c,p},2)/101;
         for cy=1:nbc
-            atemp=Acc{c,p}(:,1+(cy-1)*100:100*cy);
+            atemp=Acc{c,p}(:,1+(cy-1)*101:101*cy);
             ahead=atemp(1:8,:);                                             % Acc. medlat et antpos des 4 marqueurs de tête
             ahead(all(ahead==0,2),:)=[];                                    % Marqueur manquant pour ce cycle
             ahml=mean(ahead(1:2:end,:),1);

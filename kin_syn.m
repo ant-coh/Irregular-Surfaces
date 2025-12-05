@@ -25,8 +25,8 @@ for p=1:nbp
             end
         end
         for c=1:3
-            for cy=1:length(k{c+3*(j-1),1})/100
-                Ktemp=k{c+3*(j-1),1}(:,(1+(cy-1)*100):100*cy);
+            for cy=1:length(k{c+3*(j-1),1})/101
+                Ktemp=k{c+3*(j-1),1}(:,(1+(cy-1)*101):101*cy);
                 if ~exist('Ktm','var')
                     Ktm=Ktemp;
                 else
@@ -47,9 +47,9 @@ for p=1:nbp
             for i=1:length(ang_sup)
                 k{c+3*(j-1)}(ang_sup(i)-i+1,:) = [];
             end
-            nbc=size(k{c+3*(j-1)},2)/100;
+            nbc=size(k{c+3*(j-1)},2)/101;
             for cy=1:nbc
-                [Wtemp,Ctemp,~,~,Vtemp]=pca((k{c+3*(j-1)}(:,1+(cy-1)*100:100*cy))');
+                [Wtemp,Ctemp,~,~,Vtemp]=pca((k{c+3*(j-1)}(:,1+(cy-1)*101:101*cy))');
                 for i=1:nba-length(ang_sup)
                     if cy==1 && c~=1 && min(corrcoef(Ctemp(:,i),C{1+3*(j-1),p}{1,end-1}(i,:)),[],"all")<0
                         Ctemp(:,i)=-Ctemp(:,i);

@@ -65,7 +65,7 @@ for p=2:nbp
                         va=angles.(ang{j,a})(HS(cy):HS(cy+1),:);
                         ma=[ma va];
                     end                                                     % Normalisation des cycles
-                    mn=interp1(linspace(1,size(ma,1),size(ma,1)),ma,linspace(1,size(ma,1),100));
+                    mn=interp1(linspace(1,size(ma,1),size(ma,1)),ma,linspace(1,size(ma,1),101));
                     mk=[mk mn'];                                            % Concaténation
                 end
             end
