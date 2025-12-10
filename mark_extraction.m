@@ -9,7 +9,7 @@ clear;
 % -------------------------------------------------------------------------
 
 addpath('.\btk');
-nbp=64;                                                                     % Nombre de participants
+nbp=70;                                                                     % Nombre de participants
 cond={'Plat' 'Medium' 'High'};
 nbe=10;                                                                     % Nombre d'essais
 mark={'LFHD' 'RFHD' 'LBHD' 'RBHD' 'C7' 'T10' 'CLAV' 'STRN' 'RBAK' 'LSHO' 'LELB' 'LFIN' 'RSHO' 'RELB' 'RFIN' ...
@@ -19,7 +19,7 @@ mark={'LFHD' 'RFHD' 'LBHD' 'RBHD' 'C7' 'T10' 'CLAV' 'STRN' 'RBAK' 'LSHO' 'LELB' 
 
 if exist('Acc.mat','file')==2
     load Acc.mat
-    nbpa=size(K,2);
+    nbpa=size(Acc,2);
     if nbpa<nbp
         Acc=[Acc cell(3,nbp-nbpa)];
     end

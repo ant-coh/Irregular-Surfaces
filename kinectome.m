@@ -60,7 +60,7 @@ for p=1:nbp
         Kinect{c,p}{nbc+2,1}=std(Kap,0,3);
         clear Kap Kml
         nbm=size(k_antpos,1);
-        mac=[nbm,2];                                                        % Mean absolute corrrelation
+        mac=[nbm,2];                                                        % Mean absolute correlation
         silhou=zeros(1,nbm);
 
         for i=1:nbm
