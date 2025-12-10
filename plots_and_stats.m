@@ -39,7 +39,7 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 %% Plot MARP ou DV trois cond
 
 paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
-idms=1;  % 1 : MARP, 0 : DP
+idms=0;  % 1 : MARP, 0 : DP
 
 load PA_CRP.mat
 load participants.mat
@@ -74,6 +74,7 @@ cms=colormap(turbo(4));
 tl=tiledlayout(1,3);
 for i=1:3
     nexttile
+    box on
     for j=1:4
         hold on
         plot(0:1:100,CRPm{i,j}(1,:),'Color',cms(j,:),'LineWidth',2.5)
@@ -101,6 +102,7 @@ figure
 tl=tiledlayout(2,2);
 for j=1:4
     nexttile
+    box on
     for i=1:3
         hold on
         plot(0:1:100,CRPm{i,j}(1,:),'Color',cms(i,:),'LineWidth',2.5)
@@ -116,10 +118,14 @@ for j=1:4
     ylabel("MARP (°)")
     xlabel("% cycle")
 end
-if paire==1
-    title(tl,"Mean absolute relative phase - Knee/Hip")
-else
-    title(tl,"Mean absolute relative phase - Ankle/Knee")
+if paire==1 && idms==1
+    title(tl,"Mean Absolute Relative Phase - Knee/Hip",'FontWeight','bold')
+elseif paire==1 && idms==0
+    title(tl,"Deviation Phase - Knee/Hip DP",'FontWeight','bold')
+elseif paire==2 && idms==1
+    title(tl,"Mean Absolute Relative Phase - Ankle/Knee MARP",'FontWeight','bold')
+elseif paire==2 && idms==0
+    title(tl,"Deviation Phase - Ankle/Knee DP",'FontWeight','bold')
 end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
@@ -127,8 +133,8 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 clear
 paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
-idms=1;  % 1 : MARP, 0 : DP
-maxd=4;  % Max effect size displayed on colorbar
+idms=0;  % 1 : MARP, 0 : DP
+maxd=5;  % Max effect size displayed on colorbar
 
 load PA_CRP.mat
 load participants.mat
@@ -145,8 +151,8 @@ for p=1:nbp
     idp=idp+1;
     for c=1:3
         crptmp=zeros(2,101);
-        crptmp(1,:)=PA_CRP{c,p}{end-1,4}(paire,:);
-        crptmp(2,:)=PA_CRP{c+3,p}{end-1,4}(paire,:);
+        crptmp(1,:)=PA_CRP{c,p}{end-idms,4}(paire,:);
+        crptmp(2,:)=PA_CRP{c+3,p}{end-idms,4}(paire,:);
         Y(ind,:)=mean(crptmp,1);
         A(ind,:)=participants{p,3};
         B(ind,:)=c;
