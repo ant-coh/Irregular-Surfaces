@@ -90,10 +90,14 @@ for i=1:3
     end
 end
 legend('Adultes','','Adolescents','','Enfants','','Jeunes Enfants','')
-if paire==1
-    title(tl,"Mean absolute relative phase - Knee/Hip")
-else
-    title(tl,"Mean absolute relative phase - Ankle/Knee")
+if paire==1 && idms==1
+    title(tl,"Mean Absolute Relative Phase - Knee/Hip",'FontWeight','bold')
+elseif paire==1 && idms==0
+    title(tl,"Deviation Phase - Knee/Hip DP",'FontWeight','bold')
+elseif paire==2 && idms==1
+    title(tl,"Mean Absolute Relative Phase - Ankle/Knee MARP",'FontWeight','bold')
+elseif paire==2 && idms==0
+    title(tl,"Deviation Phase - Ankle/Knee DP",'FontWeight','bold')
 end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
@@ -132,9 +136,9 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 %% Post Hoc
 
 clear
-paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
-idms=0;  % 1 : MARP, 0 : DP
-maxd=5;  % Max effect size displayed on colorbar
+paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
+idms=1;  % 1 : MARP, 0 : DP
+maxd=4;  % Max effect size displayed on colorbar
 
 load PA_CRP.mat
 load participants.mat
