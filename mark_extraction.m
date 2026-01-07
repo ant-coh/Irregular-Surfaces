@@ -27,7 +27,7 @@ else
     Acc=cell(3,nbp);                                                        % 3 Lignes ('Plat' 'Medium' 'High')
 end
 
-[b,a]=butter(4,6/(100/2),'low');
+[bf,af]=butter(4,6/(100/2),'low');
 
 for p=2:nbp
     part=sprintf('CTL_%02d',p);
@@ -47,7 +47,14 @@ for p=2:nbp
             data=btkReadAcquisition(file);
             markers=btkGetMarkers(data);
             for m=1:length(mark)
-                markers.(mark{1,m})=filtfilt(b,a,markers.(mark{1,m}));
+                iszero=all(markers.(mark{1,m})==0,2);
+                idxstart=find(~iszero,1,'first');
+                idxend=find(~iszero,1,'last');
+                issignal=markers.(mark{1,m})(idxstart:idxend,:);
+                sigfilt=filtfilt(bf,af,issignal);
+                sigfull=zeros(size(markers.(mark{1,m})));
+                sigfull(idxstart:idxend,:)=sigfilt;
+                markers.(mark{1,m})=sigfull;
             end
             events=btkGetEvents(data);
             start=btkGetFirstFrame(data);
