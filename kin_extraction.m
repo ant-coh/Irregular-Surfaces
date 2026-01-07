@@ -30,7 +30,7 @@ else
     % 6 Lignes : Gauche ('Plat' 'Medium' 'High'), Droite ('Plat' 'Medium' 'High')
 end
 
-[b,a]=butter(4,6/(100/2),'low');                                            % Filtre passe-bas angles articulaires
+[bf,af]=butter(4,6/(100/2),'low');                                            % Filtre passe-bas angles articulaires
 
 for p=2:nbp
     part=sprintf('CTL_%02d',p);
@@ -53,7 +53,7 @@ for p=2:nbp
                 data=btkReadAcquisition(file);
                 angles=btkGetAngles(data);
                 for a=1:length(ang)
-                    angles.(ang{j,a})=filtfilt(b,a,angles.(ang{j,a}));
+                    angles.(ang{j,a})=filtfilt(bf,af,angles.(ang{j,a}));
                 end
                 events=btkGetEvents(data);
                 start=btkGetFirstFrame(data);
