@@ -27,6 +27,8 @@ else
     Acc=cell(3,nbp);                                                        % 3 Lignes ('Plat' 'Medium' 'High')
 end
 
+[b,a]=butter(4,6/(100/2),'low');
+
 for p=2:nbp
     part=sprintf('CTL_%02d',p);
     disp(['Processing participant: ' part]);
@@ -44,6 +46,9 @@ for p=2:nbp
             end
             data=btkReadAcquisition(file);
             markers=btkGetMarkers(data);
+            for m=1:length(mark)
+                markers.(mark{1,m})=filtfilt(b,a,markers.(mark{1,m}));
+            end
             events=btkGetEvents(data);
             start=btkGetFirstFrame(data);
             HSl=round(events.Left_Foot_Strike*100-start);                   % Heel strikes
