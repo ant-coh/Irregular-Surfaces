@@ -32,7 +32,7 @@ end
 
 [bf,af]=butter(4,6/(100/2),'low');                                            % Filtre passe-bas angles articulaires
 
-for p=2:nbp
+for p=1:nbp
     part=sprintf('CTL_%02d',p);
     disp(['Processing participant: ' part]);
     temp=[part '_Plat_01.c3d'];
