@@ -3,26 +3,22 @@
 
 %% Kinectomes
 
-p=4;
+p=51;
 load Kinect.mat
 figure
-tl=tiledlayout(2,3);
-markers={'HEAD' 'C7' 'T10' 'CLAV' 'STRN' 'RBAK' 'LSHO' 'LELB' 'LFIN' 'RSHO' 'RELB' 'RFIN' ...
-'LASI' 'RASI' 'LPSI' 'RPSI' 'LTHI' 'LKNE' 'LTIB' 'LANK' 'LHEE' 'LTOE' 'RTHI' 'RKNE' 'RTIB' 'RANK' 'RHEE' 'RTOE'};
-cond=["Plat" "Medium" "High"];
-for d=1:2
-    for c=1:3
-        nexttile
-        h(c+(d-1)*3)=heatmap(markers,markers,Kinect{c,p}{end-1,d},'Colormap',parula,'ColorbarVisible','off'); % ,'GridVisible','off'
-        if c==1 && d==1
-            ylabel("Antéro-postérieure")
-        elseif c==1 && d==2
-            ylabel("Médio-latérale")
-            xlabel(cond(1,c))
-        elseif d==2
-            xlabel(cond(1,c))
-        end
-    end
+tl=tiledlayout(1,3);
+markers={'HEAD' 'C7' 'T10' 'LSHO' 'LELB' 'LFIN' 'RSHO' 'RELB' 'RFIN' ...
+'LASI' 'RASI' 'LTHI' 'LKNE' 'LTIB' 'LANK' 'LTOE' 'RTHI' 'RKNE' 'RTIB' 'RANK' 'RTOE'};
+cond=["Even" "Medium" "High"];
+S=[1 1 1 1 2 2 1 3 3 1 1 3 3 3 3 3 2 2 2 2 2];
+[S_sort,I]=sort(S);
+markers_sort=markers(I);
+
+for c=1:3
+    nexttile
+    ktemp=Kinect{c,p}{end-1,1}(I,I);
+    h(c)=heatmap(markers,markers,ktemp,'Colormap',parula,'ColorbarVisible','off'); % ,'GridVisible','off'1
+    xlabel(cond(1,c))
 end
 
 colorLims = vertcat(h.ColorLimits);
@@ -32,14 +28,15 @@ set(h,'ColorLimits',globalColorLim)
 ax=axes(tl,'visible','off','Colormap',h(1).Colormap,'CLim',globalColorLim);
 cb=colorbar(ax);
 cb.Layout.Tile = 'East';
-ylabel(tl, "Direction",'FontWeight','bold')
+ylabel(tl, "Markers",'FontWeight','bold')
 xlabel(tl, "Condition",'FontWeight','bold')
+title(tl, sprintf("Kinectomes - participant %d", p))
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 %% Plot MARP ou DV trois cond
 
-paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
-idms=0;  % 1 : MARP, 0 : DP
+paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
+idms=1;  % 1 : MARP, 0 : DP
 
 load PA_CRP.mat
 load participants.mat
@@ -138,14 +135,14 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 clear
 paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
 idms=1;  % 1 : MARP, 0 : DP
-maxd=4;  % Max effect size displayed on colorbar
+maxd=3;  % Max effect size displayed on colorbar
 
 load PA_CRP.mat
 load participants.mat
 nbp=size(PA_CRP,2);
 
 %--------------------------------------------------------------------------
-% 
+ 
 ind=1;
 idp=0;
 for p=1:nbp
@@ -359,7 +356,7 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 %% Plan de covariation
 
-p=4;
+p=14;
 c=1;
 
 load cov_pla.mat
