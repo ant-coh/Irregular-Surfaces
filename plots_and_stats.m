@@ -130,12 +130,50 @@ elseif paire==2 && idms==0
 end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
+%% SPM mixed anova
+
+clear
+clc
+
+paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
+idms=0;  % 1 : MARP, 0 : DP
+
+load PA_CRP.mat
+load participants.mat
+
+nbp=size(PA_CRP,2);
+
+ind=1;
+idp=0;
+for p=1:nbp
+    if isempty(PA_CRP{1,p})
+        continue
+    end
+    idp=idp+1;
+    for c=1:3
+        crptmp=zeros(2,101);
+        crptmp(1,:)=PA_CRP{c,p}{end-idms,4}(paire,:);
+        crptmp(2,:)=PA_CRP{c+3,p}{end-idms,4}(paire,:);
+        Y(ind,:)=mean(crptmp,1);
+        A(ind,:)=participants{p,3};
+        B(ind,:)=c;
+        S(ind,:)=idp;
+        ind=ind+1;
+    end
+end
+
+spm=spm1d.stats.anova2onerm(Y,A,B,S);
+spmi=spm.inference(0.05);
+disp_summ(spmi)
+%spmi.plot();
+spmi.plot('plot_threshold_label',false,'plot_p_values',true,'autoset_ylim',true);
+
 %% Post Hoc
 
 clear
-paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
-idms=1;  % 1 : MARP, 0 : DP
-maxd=3;  % Max effect size displayed on colorbar
+paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
+idms=0;  % 1 : MARP, 0 : DP
+maxd=4;  % Max effect size displayed on colorbar
 
 load PA_CRP.mat
 load participants.mat
