@@ -133,7 +133,7 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 %% Post Hoc
 
 clear
-paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
+paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
 idms=1;  % 1 : MARP, 0 : DP
 maxd=3;  % Max effect size displayed on colorbar
 
@@ -166,6 +166,7 @@ spm=spm1d.stats.normality.anova2onerm(Y,A,B,S);                             % No
 spmi=spm.inference(0.05);
 normality=~spmi.h0reject;
 
+figure
 subplot(131);  plot(Y', 'k');  hold on;  title('Data')
 subplot(132);  plot(spm.residuals', 'k');  title('Residuals')
 subplot(133);  spmi.plot();  title('Normality test')
@@ -289,15 +290,14 @@ cms=colormap(turbo(4));
 for c=1:3
     for i=1:6
         Y0=CRPmp{c,gpaire(i,1)};
-        Y1=CRPmp{c,gpaire(i,1)};
+        Y1=CRPmp{c,gpaire(i,2)};
         bc=6;                                                               % Bonferonni correction
-
         if normality==1
-            t=spm1d.stats.ttest_paired(Y0,Y1); 
+            t=spm1d.stats.ttest2(Y0,Y1); 
             ti=t.inference(0.05/bc,'two_tailed',true,'interp',true);
         else
-            t=spm1d.stats.nonparam.ttest_paired(Y0,Y1); 
-            ti=t.inference(0.05/bc,'two_tailed',true,'iterations',-1,'force_iterations',true);
+            t=spm1d.stats.nonparam.ttest2(Y0,Y1); 
+            ti=t.inference(0.05/bc,'two_tailed',true,'iterations',60000,'force_iterations',true);
         end
 
         nexttile
