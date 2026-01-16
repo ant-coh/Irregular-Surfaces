@@ -33,10 +33,13 @@ for p=1:nbp
     part=sprintf('CTL_%02d',p);
     disp(['Processing participant: ' part]);
     temp=[part '_Plat_01.c3d'];
-    if ~exist(temp,'file')
+    if ~isempty(Acc{1,p})
+        continue
+    elseif ~exist(temp,'file')
         continue
     end
     for c=1:length(cond)
+        disp(['Condition: ' cond{c}]);
         ma=[];
         for e=1:nbe
             ess=sprintf('%02d',e);
@@ -97,7 +100,6 @@ for p=1:nbp
             end
         end
         Acc{c,p}=ma;
-        disp(['Condition: ' cond{c}]);
     end
 end
 save Acc.mat Acc

@@ -42,6 +42,7 @@ for p=1:nbp
         continue
     end
     for c=1:length(cond)
+        disp(['Condition: ' cond{c}]);
         for j=1:2                                                           % Jambe g/d
             mk=[];
             for e=1:nbe
@@ -76,7 +77,6 @@ for p=1:nbp
             end
             K{c+(j-1)*3,p}=mk;
         end
-        disp(['Condition: ' cond{c}]);
     end
 end
 save K.mat K
