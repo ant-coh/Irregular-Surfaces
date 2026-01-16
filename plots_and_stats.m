@@ -481,3 +481,55 @@ for c=1:3
 end
 title(tl,"Orientation of the covariation plane of elevation angles")
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
+
+%% Jasp orientation
+
+load cov_pla.mat
+load participants.mat
+
+nbp=size(cov_pla,2);
+tabp=[];
+
+ind=1;
+for p=1:nbp
+    if isempty(cov_pla{1,p})
+        continue
+    end
+    tabi(ind,1)=p;
+    tabg(ind,1)=participants{p,2};
+    for c=1:3
+        tabp(ind,c)=cov_pla{c,p}{4,1}(1,3);
+    end
+    ind=ind+1;
+end
+labels={"ID" "Groupe" "Even" "Medium" "High"};
+
+Data=[labels;[num2cell(tabi) tabg num2cell(tabp)]];
+filename="Orientation";
+writematrix(Data,filename)
+
+%% Jasp modularité
+
+load sil.mat
+load participants.mat
+
+nbp=size(sil,2);
+tabp=[];
+
+ind=1;
+for p=1:nbp
+    if isempty(sil{1,p})
+        continue
+    end
+    tabi(ind,1)=p;
+    tabg(ind,1)=participants{p,2};
+    for c=1:3
+        tabp(ind,c)=sil{c,p};
+    end
+    ind=ind+1;
+end
+labels={"ID" "Groupe" "Even" "Medium" "High"};
+
+Data=[labels;[num2cell(tabi) tabg num2cell(tabp)]];
+filename="Modularity";
+writematrix(Data,filename)
