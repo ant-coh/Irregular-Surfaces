@@ -26,9 +26,14 @@ else
 end
 
 for c=1:SPMi.nClusters
+    if isfield(SPMi.clusters{1,c},'endpoints')
+        b_inf=round(SPMi.clusters{1,c}.endpoints(1,1));
+        b_sup=round(SPMi.clusters{1,c}.endpoints(1,2));
+    else
+        b_inf=round((SPMi.clusters{1,c}(1)));
+        b_sup=round((SPMi.clusters{1,c}(2)));
+    end
 
-    b_inf=round(SPMi.clusters{1,c}.endpoints(1,1));
-    b_sup=round(SPMi.clusters{1,c}.endpoints(1,2));
     if b_sup-b_inf < thres
         continue
     end
