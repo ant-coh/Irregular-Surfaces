@@ -663,7 +663,7 @@ writematrix(Data,filename)
 clear
 clc
 
-paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
+paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
 idms=1;  % 1 : MARP, 0 : DP
 maxd=3;  % Max effect size displayed on colorbar
 thres=0; % Min size of displayed clusters
@@ -750,6 +750,15 @@ for i=1:3
             xlabel("% gait cycle",'Fontsize',11)
         end
         ysecondarylabel("(°)")
+        if g==1
+            if i==1
+                ylabel("Even vs Moderately uneven",'FontWeight','bold')
+            elseif i==2
+                ylabel("Even vs Highly uneven",'FontWeight','bold')
+            else
+                ylabel("Moderately vs Highly uneven",'FontWeight','bold')
+            end
+        end
         % if g==1
         %     if idms==1
         %         ylabel("MARP (°)")
@@ -785,13 +794,13 @@ cb.Layout.Tile='east';
 cb.FontSize=12;
 ylabel(cb,"Cohen's d",'FontSize',12)
 if paire==1 && idms==1
-    title(tl,"Knee/Hip MARP - Surface comparisons",'FontWeight','bold')
+    title(tl,"Knee/Hip MARP - Surface comparisons",'FontWeight','bold','FontSize',14)
 elseif paire==1 && idms==0
-    title(tl,"Knee/Hip DP - Surface comparisons",'FontWeight','bold')
+    title(tl,"Knee/Hip DP - Surface comparisons",'FontWeight','bold','FontSize',14)
 elseif paire==2 && idms==1
-    title(tl,"Ankle/Knee MARP - Surface comparisons",'FontWeight','bold')
+    title(tl,"Ankle/Knee MARP - Surface comparisons",'FontWeight','bold','FontSize',14)
 elseif paire==2 && idms==0
-    title(tl,"Ankle/Knee DP - Surface comparisons",'FontWeight','bold')
+    title(tl,"Ankle/Knee DP - Surface comparisons",'FontWeight','bold','FontSize',14)
 end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
@@ -840,12 +849,15 @@ for c=1:3
             ylim([0 180])
             yticks([0 90 180])
         else
-            ylim([0 40])
+            ylim([0 60])
             yticks([0 30 60])
         end
         box on
         set(gca,'Layer','Top');
         xticks([0 20 40 60 80 100])
+        if c==1
+            title(grouptl(gpaire(i,1))+" vs "+grouptl(gpaire(i,2)),FontSize=12)
+        end
         if c==3
             xlabel("% gait cycle",'Fontsize',11)
         end
@@ -872,13 +884,13 @@ cb.Layout.Tile='east';
 ylabel(cb,"Cohen's d",'FontSize',12)
 cb.FontSize=12;
 if paire==1 && idms==1
-    title(tl,"Knee/Hip MARP - Group comparisons",'FontWeight','bold')
+    title(tl,"Knee/Hip MARP - Group comparisons",'FontWeight','bold','FontSize',14)
 elseif paire==1 && idms==0
-    title(tl,"Knee/Hip DP - Group comparisons",'FontWeight','bold')
+    title(tl,"Knee/Hip DP - Group comparisons",'FontWeight','bold','FontSize',14)
 elseif paire==2 && idms==1
-    title(tl,"Ankle/Knee MARP - Group comparisons",'FontWeight','bold')
+    title(tl,"Ankle/Knee MARP - Group comparisons",'FontWeight','bold','FontSize',14)
 elseif paire==2 && idms==0
-    title(tl,"Ankle/Knee DP - Group comparisons",'FontWeight','bold')
+    title(tl,"Ankle/Knee DP - Group comparisons",'FontWeight','bold','FontSize',14)
 end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
