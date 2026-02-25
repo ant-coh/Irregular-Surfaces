@@ -3,7 +3,8 @@
 
 %% Kinectomes
 
-p=51;
+clear
+p=4;
 load Kinect.mat
 figure
 tl=tiledlayout(1,3);
@@ -17,7 +18,7 @@ markers_sort=markers(I);
 for c=1:3
     nexttile
     ktemp=Kinect{c,p}{end-1,1}(I,I);
-    h(c)=heatmap(markers,markers,ktemp,'Colormap',parula,'ColorbarVisible','off'); % ,'GridVisible','off'1
+    h(c)=heatmap(markers_sort,markers_sort,ktemp,'Colormap',parula,'ColorbarVisible','off'); % ,'GridVisible','off'
     xlabel(cond(1,c))
 end
 
@@ -135,8 +136,8 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 clear
 clc
 
-paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
-idms=0;  % 1 : MARP, 0 : DP
+paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
+idms=1;  % 1 : MARP, 0 : DP
 
 load PA_CRP.mat
 load participants.mat
@@ -168,20 +169,73 @@ disp_summ(spmi)
 %spmi.plot();
 spmi.plot('plot_threshold_label',false,'plot_p_values',true,'autoset_ylim',true);
 
-%% Post Hoc
+%% SPM mixed non-param Anova
 
 clear
 clc
 
 paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
 idms=0;  % 1 : MARP, 0 : DP
+
+load PA_CRP.mat
+load participants.mat
+
+nbp=size(PA_CRP,2);
+
+ind=1;
+idp=0;
+for p=1:nbp
+    if isempty(PA_CRP{1,p})
+        continue
+    end
+    idp=idp+1;
+    for c=1:3
+        crptmp=zeros(2,101);
+        crptmp(1,:)=PA_CRP{c,p}{end-idms,4}(paire,:);
+        crptmp(2,:)=PA_CRP{c+3,p}{end-idms,4}(paire,:);
+        Y(ind,:)=mean(crptmp,1);
+        A(ind,:)=participants{p,3};
+        B(ind,:)=c;
+        S(ind,:)=idp;
+        ind=ind+1;
+    end
+end
+
+rng(0)     %set the random number generator seed
+alpha      = 0.05;
+iterations = 1000;
+FFn        = spm1d.stats.nonparam.anova2onerm(Y, A, B, S);
+FFni       = FFn.inference(alpha, 'iterations', iterations);
+disp_summ(FFni)
+
+%close all;
+FFni.plot('plot_threshold_label',false, 'plot_p_values',false, 'autoset_ylim',true);
+FFi        = spm1d.stats.anova2onerm(Y, A, B, S).inference(alpha);
+%%% compare to parametric results by plotting the parametric thresholds:
+for i = 1:FFi.nEffects
+    Fi = FFi(i);
+    subplot(2,2,i);
+    hold on
+    plot([0 numel(Fi.z)], Fi.zstar*[1 1], 'color','c', 'linestyle','--')
+    hold off
+    text(5, Fi.zstar, 'Parametric', 'color','k', 'backgroundcolor','c')
+end
+
+
+%% Post Hoc
+
+clear
+clc
+
+paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
+idms=1;  % 1 : MARP, 0 : DP
 maxd=4;  % Max effect size displayed on colorbar
 thres=0; % Min size of displayed clusters
 
 load PA_CRP.mat
 load participants.mat
 if isfile('Posthoc.mat')
-    load('Posthoc.mat');
+    load Posthoc.mat
 end
 nbp=size(PA_CRP,2);
 
@@ -210,15 +264,15 @@ spm=spm1d.stats.normality.anova2onerm(Y,A,B,S);                             % No
 spmi=spm.inference(0.05);
 normality=~spmi.h0reject;
 
-figure
+f=figure;
 subplot(131);  plot(Y', 'k');  hold on;  title('Data')
 subplot(132);  plot(spm.residuals', 'k');  title('Residuals')
 subplot(133);  spmi.plot();  title('Normality test')
 
 %--------------------------------------------------------------------------
 
-cond=["Even" "Medium" "High"];
-group=["Adultes" "Adolescents" "Enfants" "Jeunes Enfants"];
+cond=["Even" "Moderate" "High"];
+group=["Adults" "Adolescents" "Children" "Young_children"];
 fields=["KH_DP" "KH_MARP" ; "AK_DP" "AK_MARP"];
 
 ind=ones(3,4);
@@ -243,7 +297,7 @@ for i=1:3
     end
 end
 
-figure
+f=figure;
 tl=tiledlayout(3,4);
 c=[1 2 3];
 cpaire=nchoosek(c,2);                                                       % Paires de conditions
@@ -276,8 +330,8 @@ rng("shuffle")
              for cl=1:ti.nClusters
                  Posthoc.(fields(paire,idms+1)).Condition.(subfield).Clusters{cl} = ti.clusters{1,cl}.endpoints;
              end
+             Posthoc.(fields(paire,idms+1)).Condition.(subfield).dCohen=cohensd(ti,Y0,Y1,thres);
         end
-        Posthoc.(fields(paire,idms+1)).Condition.(subfield).dCohen=cohensd(ti,Y0,Y1,thres);
 
         nexttile
         hold on
@@ -288,13 +342,15 @@ rng("shuffle")
             f.FaceColor=cms(cpaire(i,k),:);
             f.EdgeColor='none';
             f.FaceAlpha=0.25;
+            ax=gca;
+            ax.FontSize=15;
         end
         if idms==1
             ylim([0 180])
-            legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','southwest')
+            legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','southwest','Fontsize',15)
         else
             ylim([0 60])
-            legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','northeast')
+            legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','northeast','Fontsize',15)
         end
         box on
         set(gca,'Layer','Top');
@@ -327,7 +383,7 @@ colormap(cms_d);
 cb=colorbar;
 clim([0 maxd])
 cb.Layout.Tile='east';
-ylabel(cb,"Cohen's d",'FontSize',13)
+ylabel(cb,"d de Cohen",'FontSize',13)
 if paire==1 && idms==1
     title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
 elseif paire==1 && idms==0
@@ -343,7 +399,8 @@ figure
 tl=tiledlayout(3,6);
 g=[1 2 3 4];
 gpaire=nchoosek(g,2);
-cms=colormap(turbo(4));
+cms = [0.18  0.55  0.98 ; 0.08  0.82  0.42 ; 0.95  0.60  0.10 ; 0.75  0.35  0.78 ];
+%cms=brighten(cms,-.2);
 for c=1:3
     for i=1:6
         Y0=CRPmp{c,gpaire(i,1)};
@@ -365,8 +422,8 @@ for c=1:3
              for cl=1:ti.nClusters
                  Posthoc.(fields(paire,idms+1)).Group.(subfield).Clusters{cl} = ti.clusters{1,cl}.endpoints;
              end
+             Posthoc.(fields(paire,idms+1)).Group.(subfield).dCohen=cohensd(ti,Y0,Y1,thres);
         end
-        Posthoc.(fields(paire,idms+1)).Group.(subfield).dCohen=cohensd(ti,Y0,Y1,thres);
 
         nexttile
         hold on
@@ -376,14 +433,16 @@ for c=1:3
             f=fill([0:1:100 100:-1:0],[(CRPm{c,gpaire(i,k)}(1,:)+CRPm{c,gpaire(i,k)}(2,:)) fliplr((CRPm{c,gpaire(i,k)}(1,:)-CRPm{c,gpaire(i,k)}(2,:)))],'c');
             f.FaceColor=cms(gpaire(i,k),:);
             f.EdgeColor='none';
-            f.FaceAlpha=0.2;
+            f.FaceAlpha=0.3;
+            ax=gca;
+            ax.FontSize=11;
         end
         if idms==1
             ylim([0 180])
-            legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','southwest')
+            legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','southeast','Fontsize',15)
         else
-            ylim([0 60])
-            legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','northeast')
+            ylim([0 40])
+            legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','northeast','Fontsize',11)
         end
         box on
         set(gca,'Layer','Top');
@@ -393,7 +452,7 @@ for c=1:3
         if i==1
             ylabel(cond(1,c),'FontWeight','bold')
         end
-        ysecondarylabel("(°)")
+        %ysecondarylabel("(°)")
     end
 end
 if exist('cms_d.mat','file')==2
@@ -410,7 +469,8 @@ colormap(cms_d);
 cb=colorbar;
 clim([0 maxd])
 cb.Layout.Tile='east';
-ylabel(cb,"Cohen's d",'FontSize',13)
+ylabel(cb,"Cohen's d",'FontSize',15)
+cb.FontSize=11;
 if paire==1 && idms==1
     title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
 elseif paire==1 && idms==0
@@ -421,6 +481,7 @@ elseif paire==2 && idms==0
     title(tl,"Post-Hoc tests - Ankle/Knee DP",'FontWeight','bold')
 end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
+
 
 function d=cohensd(ti,Y0,Y1,thres)
     d=zeros(1,ti.nClusters);
@@ -435,16 +496,16 @@ function d=cohensd(ti,Y0,Y1,thres)
 
         for b=b_inf+1:b_sup+1
     
-            mY0=mean(Y0(:,b));                                                  % Mean of the distribution
-            sY0=std(Y0(:,b));                                                   % Standard deviation
-            nY0=size(Y0(:,b),1);                                                % Sample size
+            mY0=mean(Y0(:,b));                                              % Mean of the distribution
+            sY0=std(Y0(:,b));                                               % Standard deviation
+            nY0=size(Y0(:,b),1);                                            % Sample size
     
             mY1=mean(Y1(:,b));
             sY1=std(Y1(:,b));
             nY1=size(Y1(:,b),1);
     
             s_pooled=sqrt(((sY0^2*(nY0-1))+(sY1^2*(nY1- 1)))/(nY0+nY1-2));
-            dtemp(ind)=abs(mY1-mY0)/s_pooled;                                       % Effect size (Cohen's d)
+            dtemp(ind)=abs(mY1-mY0)/s_pooled;                               % Effect size (Cohen's d)
             ind=ind+1;
         end
         d(1,c)=mean(dtemp);
@@ -455,7 +516,7 @@ save Posthoc.mat Posthoc
 
 %% Plan de covariation
 
-p=14;
+p=4;
 c=1;
 
 load cov_pla.mat
@@ -506,7 +567,7 @@ box on
 
 %% Plan de covariation - u3t - 3 conditions
 
-p=25;
+p=4;
 
 load cov_pla.mat
 figure
@@ -594,3 +655,233 @@ labels={"ID" "Groupe" "Even" "Medium" "High"};
 Data=[labels;[num2cell(tabi) tabg num2cell(tabp)]];
 filename="Modularity";
 writematrix(Data,filename)
+
+%% Moyennes et écarts types - modularité
+
+%% Plots post hoc
+
+clear
+clc
+
+paire=1; % 1 : Knee/Hip, 2 : Ankle/Knee
+idms=1;  % 1 : MARP, 0 : DP
+maxd=3;  % Max effect size displayed on colorbar
+thres=0; % Min size of displayed clusters
+lw=2;  % LineWidth
+
+load PA_CRP.mat
+load participants.mat
+load Posthoc.mat
+nbp=size(PA_CRP,2);
+
+cond=["Even" "Moderate" "High"];
+condtl=["Even" "Moderately uneven" "Highly uneven"];
+group=["Adults" "Adolescents" "Children" "Young_children"];
+grouptl=["Adults" "Adolescents" "Children" "Young Children"];
+fields=["KH_DP" "KH_MARP" ; "AK_DP" "AK_MARP"];
+
+ind=ones(3,4);
+CRPmp=cell(3,4);
+for p=1:nbp
+    if isempty(PA_CRP{1,p})
+        continue
+    end
+    idg=participants{p,3};
+    for c=1:3                                                               % Tri par participant et condition
+        CRPtemp(1,:)=PA_CRP{c,p}{end-idms,4}(paire,:);                      % jambe gauche
+        CRPtemp(2,:)=PA_CRP{c+3,p}{end-idms,4}(paire,:);                    % jambe droite
+        CRPmp{c,idg}(ind(c,idg),:)=mean(CRPtemp,1);                         % Moyenne
+        ind(c,idg)=ind(c,idg)+1;
+    end
+end
+CRPm=cell(3,4);
+for i=1:3
+    for j=1:4
+        CRPm{i,j}=mean(CRPmp{i,j},1);                                       % Moyenne et std par groupe et condition
+        CRPm{i,j}(2,:)=std(CRPmp{i,j},0,1);
+    end
+end
+
+f=figure;
+tl=tiledlayout(3,4);
+c=[1 2 3];
+cpaire=nchoosek(c,2);                                                       % Paires de conditions
+cms=colormap(nebula(3));
+cms=brighten(cms,-.2);
+lns=["-","--",":"];
+h = gobjects(1,3);
+for i=1:3
+    for g=1:4
+        Y0=CRPmp{cpaire(i,1),g};
+        Y1=CRPmp{cpaire(i,2),g};
+        subfield=group(1,g)+"_"+cond(1,cpaire(i,1))+"_"+cond(1,cpaire(i,2));
+        subfield=matlab.lang.makeValidName(subfield);
+        nexttile
+        hold on
+        rect_color(Posthoc.(fields(paire,idms+1)).Condition.(subfield),Y0,Y1,thres,maxd)                                     % Clusters et Cohen's d
+        for k=1:2
+            if g==1 && i==1
+                h(1,k)= plot(0:1:100,CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',lw,'LineStyle',lns(cpaire(i,k)));
+                set(h(1,k),'DisplayName', condtl(k))
+            elseif g==1 && i==2 && k==2
+                h(1,3)= plot(0:1:100,CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',lw,'LineStyle',lns(cpaire(i,k)));
+                set(h(1,3),'DisplayName', condtl(3))
+            else    
+                plot(0:1:100,CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',lw,'LineStyle',lns(cpaire(i,k)))
+            end
+            f=fill([0:1:100 100:-1:0],[(CRPm{cpaire(i,k),g}(1,:)+CRPm{cpaire(i,k),g}(2,:)) fliplr((CRPm{cpaire(i,k),g}(1,:)-CRPm{cpaire(i,k),g}(2,:)))],'c');
+            f.FaceColor=cms(cpaire(i,k),:);
+            f.EdgeColor='none';
+            f.FaceAlpha=0.25;
+            ax=gca;
+            ax.FontSize=12;
+        end
+        if idms==1
+            ylim([0 180])
+            yticks([0 90 180])
+        else
+            ylim([0 60])
+            yticks([0 30 60])
+        end
+        box on
+        set(gca,'Layer','Top');
+        xticks([0 20 40 60 80 100])
+        if i==3
+            xlabel("% gait cycle",'Fontsize',11)
+        end
+        ysecondarylabel("(°)")
+        % if g==1
+        %     if idms==1
+        %         ylabel("MARP (°)")
+        %     else
+        %         ylabel("SD (°)")
+        %     end
+        % end
+        if i==1
+            title(grouptl(1,g))
+        end
+    end
+end
+% if idms==1
+%     ylabel(tl,"MARP (°)")
+% else
+%     ylabel(tl,"SD (°)")
+% end
+%xlabel(tl,"% gait cycle")
+if exist('cms_d.mat','file')==2
+    load cms_d.mat cms_d
+    cms_d=brighten(cms_d,.4);
+    if maxd~=3
+        cms_d=interp1(1:300,cms_d,linspace(1,300,maxd*100),'spline');
+    end
+else
+    cms_d=colormap(turbo(300));
+    cms_d=brighten(cms_d,.6);
+end
+colormap(cms_d);
+cb=colorbar;
+clim([0 maxd])
+cb.Layout.Tile='east';
+cb.FontSize=12;
+ylabel(cb,"Cohen's d",'FontSize',12)
+if paire==1 && idms==1
+    title(tl,"Knee/Hip MARP - Surface comparisons",'FontWeight','bold')
+elseif paire==1 && idms==0
+    title(tl,"Knee/Hip DP - Surface comparisons",'FontWeight','bold')
+elseif paire==2 && idms==1
+    title(tl,"Ankle/Knee MARP - Surface comparisons",'FontWeight','bold')
+elseif paire==2 && idms==0
+    title(tl,"Ankle/Knee DP - Surface comparisons",'FontWeight','bold')
+end
+tl.Padding = 'compact'; tl.TileSpacing = 'compact';
+
+lg=legend(h(:),'orientation','horizontal','box','off','FontSize',14);
+lg.Layout.Tile = 'South';
+lg.IconColumnWidth = 60;
+
+figure
+tl=tiledlayout(3,6);
+g=[1 2 3 4];
+gpaire=nchoosek(g,2);
+cms = [0.18  0.55  0.98 ; 0.08  0.82  0.42 ; 0.95  0.60  0.10 ; 0.75  0.35  0.78 ];
+cms=brighten(cms,-.2);
+lns=["-","--","-.",":"];
+h = gobjects(1,4);
+for c=1:3
+    for i=1:6
+        Y0=CRPmp{c,gpaire(i,1)};
+        Y1=CRPmp{c,gpaire(i,2)};
+        subfield=cond(1,c)+"_"+group(1,gpaire(i,1))+"_"+group(1,gpaire(i,2));
+        subfield=matlab.lang.makeValidName(subfield);
+        nexttile
+        hold on
+        rect_color(Posthoc.(fields(paire,idms+1)).Group.(subfield),Y0,Y1,thres,maxd)
+        for k=1:2
+            if c==1 && i==1
+                h(1,k)= plot(0:1:100,CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',lw,'LineStyle',lns(gpaire(i,k)));
+                set(h(1,k),'DisplayName', group(k))
+            elseif c==1 && i==2 && k==2
+                h(1,3)= plot(0:1:100,CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',lw,'LineStyle',lns(gpaire(i,k)));
+                set(h(1,3),'DisplayName', "Children")
+            elseif c==1 && i==3 && k==2
+                h(1,4)= plot(0:1:100,CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',lw,'LineStyle',lns(gpaire(i,k)));
+                set(h(1,4),'DisplayName', "Young Children")
+            else
+                plot(0:1:100,CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',lw,'LineStyle',lns(gpaire(i,k)));
+            end
+            f=fill([0:1:100 100:-1:0],[(CRPm{c,gpaire(i,k)}(1,:)+CRPm{c,gpaire(i,k)}(2,:)) fliplr((CRPm{c,gpaire(i,k)}(1,:)-CRPm{c,gpaire(i,k)}(2,:)))],'c');
+            f.FaceColor=cms(gpaire(i,k),:);
+            f.EdgeColor='none';
+            f.FaceAlpha=0.3;
+            ax=gca;
+            ax.FontSize=12;
+        end
+        if idms==1
+            ylim([0 180])
+            yticks([0 90 180])
+        else
+            ylim([0 40])
+            yticks([0 30 60])
+        end
+        box on
+        set(gca,'Layer','Top');
+        xticks([0 20 40 60 80 100])
+        if c==3
+            xlabel("% gait cycle",'Fontsize',11)
+        end
+        if i==1
+            ylabel(condtl(1,c),'FontWeight','bold')
+        end
+        ysecondarylabel("(°)")
+    end
+end
+if exist('cms_d.mat','file')==2
+    load cms_d.mat cms_d
+    cms_d=brighten(cms_d,.4);
+    if maxd~=3
+        cms_d=interp1(1:300,cms_d,linspace(1,300,maxd*100),'spline');
+    end
+else
+    cms_d=colormap(turbo(300));
+    cms_d=brighten(cms_d,.6);
+end
+colormap(cms_d);
+cb=colorbar;
+clim([0 maxd])
+cb.Layout.Tile='east';
+ylabel(cb,"Cohen's d",'FontSize',12)
+cb.FontSize=12;
+if paire==1 && idms==1
+    title(tl,"Knee/Hip MARP - Group comparisons",'FontWeight','bold')
+elseif paire==1 && idms==0
+    title(tl,"Knee/Hip DP - Group comparisons",'FontWeight','bold')
+elseif paire==2 && idms==1
+    title(tl,"Ankle/Knee MARP - Group comparisons",'FontWeight','bold')
+elseif paire==2 && idms==0
+    title(tl,"Ankle/Knee DP - Group comparisons",'FontWeight','bold')
+end
+tl.Padding = 'compact'; tl.TileSpacing = 'compact';
+
+lg=legend(h(:),'orientation','horizontal','box','off','FontSize',14);
+lg.Layout.Tile = 'South';
+lg.IconColumnWidth = 60;
