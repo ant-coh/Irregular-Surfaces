@@ -897,3 +897,113 @@ tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 lg=legend(h(:),'orientation','horizontal','box','off','FontSize',14);
 lg.Layout.Tile = 'South';
 lg.IconColumnWidth = 60;
+
+%% Raincloud plots
+
+clear
+load sil.mat
+load participants.mat
+
+nbp=size(sil,2);
+
+ind=ones(3,4);
+Data=cell(1,4);
+for p=1:nbp
+    if isempty(sil{1,p})
+        continue
+    end
+    idg=participants{p,3};
+    for c=1:3
+        Data{1,5-idg}(ind(c,idg),c)=sil{c,p};
+        ind(c,idg)=ind(c,idg)+1;
+    end
+end
+cms = [ 0.75  0.35  0.78 ; 0.95  0.6  0.1 ; 0.08  0.82  0.42 ; 0.18  0.55  0.98];
+
+group = {'Young children','Children','Adolescents','Adults'};
+condition= {'Even', 'Moderately uneven', 'Highly uneven'};
+
+f=figure;
+h = daviolinplot(Data,'colors',cms,'box',3,...
+    'boxcolor','w','scatter',2,'jitter',1,'scattercolor','same',...
+    'scattersize',25,'scatteralpha',0.5,'linkline',1,...
+    'xtlabels', condition, 'violinalpha',.5, 'violinwidth',1.1,...
+    'legend',group,'outliers',0, 'boxwidth',1, 'boxspacing',.95); 
+ylabel('Modularity');
+xl = xlim; xlim([xl(1), xl(2)+0.05]);
+ylim([.16 , .74])
+set(h.sc,'MarkerEdgeColor','none');
+set(gca,'FontSize',12);
+box on
+
+%% Kinectomes moyens par condition (groupe au choix)
+
+clear
+g=4; 
+
+load Kinect_mean.mat
+figure
+tl=tiledlayout(1,3);
+markers={'HEAD' 'C7' 'T10' 'LSHO' 'LELB' 'LFIN' 'RSHO' 'RELB' 'RFIN' ...
+'LASI' 'RASI' 'LTHI' 'LKNE' 'LTIB' 'LANK' 'LTOE' 'RTHI' 'RKNE' 'RTIB' 'RANK' 'RTOE'};
+cond=["Even" "Medium" "High"];
+group=["Adults" "Teenagers" "Children" "Young Children"];
+S=[1 1 1 1 2 2 1 3 3 1 1 3 3 3 3 3 2 2 2 2 2];
+[~,I]=sort(S);
+markers_sort=markers(I);
+
+for c=1:3
+    nexttile
+    ktemp=Kinect_mean{c,g}(I,I);
+    h(c)=heatmap(markers_sort,markers_sort,ktemp,'Colormap',parula,'ColorbarVisible','off'); % ,'GridVisible','off'
+    xlabel(cond(1,c))
+end
+
+colorLims = vertcat(h.ColorLimits);
+globalColorLim=[min(colorLims(:,1)),max(colorLims(:,2))];
+set(h,'ColorLimits',globalColorLim)
+
+ax=axes(tl,'visible','off','Colormap',h(1).Colormap,'CLim',globalColorLim);
+cb=colorbar(ax);
+cb.Layout.Tile = 'East';
+ylabel(tl, "Markers",'FontWeight','bold')
+xlabel(tl, "Condition",'FontWeight','bold')
+title(tl, sprintf("Mean kinectomes - %s", group(1,g)))
+%title(tl, sprintf("Kinectomes moyens - participant %d", p))
+tl.Padding = 'compact'; tl.TileSpacing = 'compact';
+
+%% Kinectomes moyens par groupe (condition au choix)
+
+clear
+c=3;
+
+load Kinect_mean.mat
+f=figure;
+tl=tiledlayout(2,2);
+markers={'HEAD' 'C7' 'T10' 'LSHO' 'LELB' 'LFIN' 'RSHO' 'RELB' 'RFIN' ...
+'LASI' 'RASI' 'LTHI' 'LKNE' 'LTIB' 'LANK' 'LTOE' 'RTHI' 'RKNE' 'RTIB' 'RANK' 'RTOE'};
+cond=["Even" "Medium" "Surface irrégulière"];
+group=["Adultes" "Adolescents" "Enfants" "Jeunes enfants"];
+S=[1 1 1 1 2 2 1 3 3 1 1 3 3 3 3 3 2 2 2 2 2];
+[~,I]=sort(S);
+markers_sort=markers(I);
+
+for g=1:4
+    nexttile
+    ktemp=Kinect_mean{c,g}(I,I);
+    h(g)=heatmap(markers_sort,markers_sort,ktemp,'Colormap',parula,'ColorbarVisible','off','CellLabelColor','none');
+    title(group(1,g));
+end
+fontsize(13,"points")
+colorLims = vertcat(h.ColorLimits);
+globalColorLim=[min(colorLims(:,1)),max(colorLims(:,2))];
+set(h,'ColorLimits',globalColorLim)
+
+ax=axes(tl,'visible','off','Colormap',h(1).Colormap,'CLim',globalColorLim);
+cb=colorbar(ax);
+cb.Layout.Tile = 'East';
+cb.FontSize=13;
+ylabel(cb,"Corrélation",'FontSize',13)
+ylabel(tl, "Marqueurs",'FontWeight','bold')
+title(tl, sprintf("Kinectomes moyens - %s", cond(1,c)))
+tl.Padding = 'compact';% tl.TileSpacing = 'compact';
