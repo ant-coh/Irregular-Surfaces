@@ -11,7 +11,7 @@ clear
 load Acc.mat
 nbp=size(Acc,2);
 Kinect=cell(3,nbp);
-MAC=cell(3,nbp);
+STR=cell(3,nbp);
 sil=cell(3,nbp);
 
 S=[1 1 1 1 2 2 1 3 3 1 1 3 3 3 3 3 2 2 2 2 2];
@@ -60,12 +60,12 @@ for p=1:nbp
         Kinect{c,p}{nbc+2,1}=std(Kap,0,3);
         clear Kap Kml
         nbm=size(k_antpos,1);
-        mac=[nbm,2];                                                        % Mean absolute correlation
+        str=[nbm,2];                                                        % Strength of the node
         silhou=zeros(1,nbm);
 
         for i=1:nbm
-            mac(i,1)=(sum(abs(Kinect{c,p}{end-1,1}(i,:)))-1)/nbm;
-            mac(i,2)=(sum(abs(Kinect{c,p}{end-1,2}(i,:)))-1)/nbm;
+            str(i,1)=sum(abs(Kinect{c,p}{end-1,1}(i,:)))-1;
+            str(i,2)=sum(abs(Kinect{c,p}{end-1,2}(i,:)))-1;
             
             Kin=Kinect{c,p}{end-1,1}(I,I);
             clust_i=S_sort(i);
@@ -87,11 +87,11 @@ for p=1:nbp
             end
             silhou(i)=(min(b)-a)/max(a,min(b));
         end
-        MAC{c,p}=mac;
+        STR{c,p}=str;
         sil{c,p}=mean(silhou,2);
     end
 end
 
 save Kinect.mat Kinect
-save MAC.mat MAC
+save STR.mat STR
 save sil.mat sil

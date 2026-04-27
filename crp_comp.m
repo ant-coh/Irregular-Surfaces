@@ -3,8 +3,8 @@
 % et l'écart-type des crp sont ensuite calculés pour chaque p et c.
 
 %%
-clc;
-clear;
+clc
+clear
 % -------------------------------------------------------------------------
 addpath('Functions')
 load K_crp.mat

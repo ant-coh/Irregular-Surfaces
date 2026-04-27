@@ -10,7 +10,7 @@ close all;
 % -------------------------------------------------------------------------
 
 addpath('.\btk');
-nbp=70;                                                                     % Nombre de participants
+nbp=80;                                                                     % Nombre de participants
 cond={'Plat' 'Medium' 'High'};
 nbe=10;                                                                     % Nombre d'essais
 ang={'LHipAngles' 'LKneeAngles' 'LAnkleAngles' 'LThoraxAngles' 'LSpineAngles' 'LPelvisAngles';...

@@ -9,7 +9,7 @@ clear;
 % -------------------------------------------------------------------------
 
 addpath('.\btk');
-nbp=70;                                                                     % Nombre de participants
+nbp=80;                                                                     % Nombre de participants
 cond={'Plat' 'Medium' 'High'};
 nbe=10;                                                                     % Nombre d'essais
 mark={'LFHD' 'RFHD' 'LBHD' 'RBHD' 'C7' 'T10' 'CLAV' 'STRN' 'RBAK' 'LSHO' 'LELB' 'LFIN' 'RSHO' 'RELB' 'RFIN' ...

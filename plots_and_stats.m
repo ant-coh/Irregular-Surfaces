@@ -4,7 +4,7 @@
 %% Kinectomes
 
 clear
-p=4;
+p=78;
 load Kinect.mat
 figure
 tl=tiledlayout(1,3);
@@ -228,7 +228,7 @@ clear
 clc
 
 paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
-idms=1;  % 1 : MARP, 0 : DP
+idms=0;  % 1 : MARP, 0 : DP
 maxd=4;  % Max effect size displayed on colorbar
 thres=0; % Min size of displayed clusters
 
@@ -297,12 +297,12 @@ for i=1:3
     end
 end
 
-f=figure;
-tl=tiledlayout(3,4);
+% f=figure;
+% tl=tiledlayout(3,4);
 c=[1 2 3];
 cpaire=nchoosek(c,2);                                                       % Paires de conditions
-cms=colormap(nebula(3));
-cms=brighten(cms,-.2);
+% cms=colormap(nebula(3));
+% cms=brighten(cms,-.2);
 for i=1:3
     for g=1:4
         Y0=CRPmp{cpaire(i,1),g};
@@ -324,82 +324,82 @@ rng("shuffle")
         
         subfield=group(1,g)+"_"+cond(1,cpaire(i,1))+"_"+cond(1,cpaire(i,2));
         subfield=matlab.lang.makeValidName(subfield);
-        Posthoc.(fields(paire,idms+1)).Condition.(subfield).NbClusters = ti.nClusters;
+        Posthoc.(fields(paire,idms+1)).Condition.(subfield).nClusters = ti.nClusters;
         if ti.nClusters ~=0
              Posthoc.(fields(paire,idms+1)).Condition.(subfield).p = ti.p;
              for cl=1:ti.nClusters
-                 Posthoc.(fields(paire,idms+1)).Condition.(subfield).Clusters{cl} = ti.clusters{1,cl}.endpoints;
+                 Posthoc.(fields(paire,idms+1)).Condition.(subfield).clusters{cl} = ti.clusters{1,cl}.endpoints;
              end
              Posthoc.(fields(paire,idms+1)).Condition.(subfield).dCohen=cohensd(ti,Y0,Y1,thres);
         end
 
-        nexttile
-        hold on
-        rect_color(ti,Y0,Y1,thres,maxd)                                     % Clusters et Cohen's d
-        for k=1:2
-            plot(0:1:100,CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',2.5)
-            f=fill([0:1:100 100:-1:0],[(CRPm{cpaire(i,k),g}(1,:)+CRPm{cpaire(i,k),g}(2,:)) fliplr((CRPm{cpaire(i,k),g}(1,:)-CRPm{cpaire(i,k),g}(2,:)))],'c');
-            f.FaceColor=cms(cpaire(i,k),:);
-            f.EdgeColor='none';
-            f.FaceAlpha=0.25;
-            ax=gca;
-            ax.FontSize=15;
-        end
-        if idms==1
-            ylim([0 180])
-            legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','southwest','Fontsize',15)
-        else
-            ylim([0 60])
-            legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','northeast','Fontsize',15)
-        end
-        box on
-        set(gca,'Layer','Top');
-        if i==3
-            xlabel("% gait cycle")
-        end
-        if g==1
-            if idms==1
-                ylabel("MARP (°)")
-            else
-                ylabel("SD (°)")
-            end
-        end
-        if i==1
-            title(group(1,g))
-        end
+%         nexttile
+%         hold on
+%         rect_color(ti,Y0,Y1,thres,maxd)                                     % Clusters et Cohen's d
+%         for k=1:2
+%             plot(0:1:100,CRPm{cpaire(i,k),g}(1,:),'Color',cms(cpaire(i,k),:),'LineWidth',2.5)
+%             f=fill([0:1:100 100:-1:0],[(CRPm{cpaire(i,k),g}(1,:)+CRPm{cpaire(i,k),g}(2,:)) fliplr((CRPm{cpaire(i,k),g}(1,:)-CRPm{cpaire(i,k),g}(2,:)))],'c');
+%             f.FaceColor=cms(cpaire(i,k),:);
+%             f.EdgeColor='none';
+%             f.FaceAlpha=0.25;
+%             ax=gca;
+%             ax.FontSize=15;
+%         end
+%         if idms==1
+%             ylim([0 180])
+%             legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','southwest','Fontsize',15)
+%         else
+%             ylim([0 60])
+%             legend(cond(1,cpaire(i,1)),"",cond(1,cpaire(i,2)),"",'Location','northeast','Fontsize',15)
+%         end
+%         box on
+%         set(gca,'Layer','Top');
+%         if i==3
+%             xlabel("% gait cycle")
+%         end
+%         if g==1
+%             if idms==1
+%                 ylabel("MARP (°)")
+%             else
+%                 ylabel("SD (°)")
+%             end
+%         end
+%         if i==1
+%             title(group(1,g))
+%         end
     end
 end
-if exist('cms_d.mat','file')==2
-    load cms_d.mat cms_d
-    cms_d=brighten(cms_d,.4);
-    if maxd~=3
-        cms_d=interp1(1:300,cms_d,linspace(1,300,maxd*100),'spline');
-    end
-else
-    cms_d=colormap(turbo(300));
-    cms_d=brighten(cms_d,.6);
-end
-colormap(cms_d);
-cb=colorbar;
-clim([0 maxd])
-cb.Layout.Tile='east';
-ylabel(cb,"d de Cohen",'FontSize',13)
-if paire==1 && idms==1
-    title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
-elseif paire==1 && idms==0
-    title(tl,"Post-Hoc tests - Knee/Hip DP",'FontWeight','bold')
-elseif paire==2 && idms==1
-    title(tl,"Post-Hoc tests - Ankle/Knee MARP",'FontWeight','bold')
-elseif paire==2 && idms==0
-    title(tl,"Post-Hoc tests - Ankle/Knee DP",'FontWeight','bold')
-end
-tl.Padding = 'compact'; tl.TileSpacing = 'compact';
-
-figure
-tl=tiledlayout(3,6);
+% if exist('cms_d.mat','file')==2
+%     load cms_d.mat cms_d
+%     cms_d=brighten(cms_d,.4);
+%     if maxd~=3
+%         cms_d=interp1(1:300,cms_d,linspace(1,300,maxd*100),'spline');
+%     end
+% else
+%     cms_d=colormap(turbo(300));
+%     cms_d=brighten(cms_d,.6);
+% end
+% colormap(cms_d);
+% cb=colorbar;
+% clim([0 maxd])
+% cb.Layout.Tile='east';
+% ylabel(cb,"d de Cohen",'FontSize',13)
+% if paire==1 && idms==1
+%     title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
+% elseif paire==1 && idms==0
+%     title(tl,"Post-Hoc tests - Knee/Hip DP",'FontWeight','bold')
+% elseif paire==2 && idms==1
+%     title(tl,"Post-Hoc tests - Ankle/Knee MARP",'FontWeight','bold')
+% elseif paire==2 && idms==0
+%     title(tl,"Post-Hoc tests - Ankle/Knee DP",'FontWeight','bold')
+% end
+% tl.Padding = 'compact'; tl.TileSpacing = 'compact';
+% 
+% figure
+% tl=tiledlayout(3,6);
 g=[1 2 3 4];
 gpaire=nchoosek(g,2);
-cms = [0.18  0.55  0.98 ; 0.08  0.82  0.42 ; 0.95  0.60  0.10 ; 0.75  0.35  0.78 ];
+% cms = [0.18  0.55  0.98 ; 0.08  0.82  0.42 ; 0.95  0.60  0.10 ; 0.75  0.35  0.78 ];
 %cms=brighten(cms,-.2);
 for c=1:3
     for i=1:6
@@ -416,71 +416,71 @@ for c=1:3
 
         subfield=cond(1,c)+"_"+group(1,gpaire(i,1))+"_"+group(1,gpaire(i,2));
         subfield=matlab.lang.makeValidName(subfield);
-        Posthoc.(fields(paire,idms+1)).Group.(subfield).NbClusters = ti.nClusters;
+        Posthoc.(fields(paire,idms+1)).Group.(subfield).nClusters = ti.nClusters;
         if ti.nClusters ~=0
              Posthoc.(fields(paire,idms+1)).Group.(subfield).p = ti.p;
              for cl=1:ti.nClusters
-                 Posthoc.(fields(paire,idms+1)).Group.(subfield).Clusters{cl} = ti.clusters{1,cl}.endpoints;
+                 Posthoc.(fields(paire,idms+1)).Group.(subfield).clusters{cl} = ti.clusters{1,cl}.endpoints;
              end
              Posthoc.(fields(paire,idms+1)).Group.(subfield).dCohen=cohensd(ti,Y0,Y1,thres);
         end
 
-        nexttile
-        hold on
-        rect_color(ti,Y0,Y1,thres,maxd)
-        for k=1:2
-            plot(0:1:100,CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',2.5)
-            f=fill([0:1:100 100:-1:0],[(CRPm{c,gpaire(i,k)}(1,:)+CRPm{c,gpaire(i,k)}(2,:)) fliplr((CRPm{c,gpaire(i,k)}(1,:)-CRPm{c,gpaire(i,k)}(2,:)))],'c');
-            f.FaceColor=cms(gpaire(i,k),:);
-            f.EdgeColor='none';
-            f.FaceAlpha=0.3;
-            ax=gca;
-            ax.FontSize=11;
-        end
-        if idms==1
-            ylim([0 180])
-            legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','southeast','Fontsize',15)
-        else
-            ylim([0 40])
-            legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','northeast','Fontsize',11)
-        end
-        box on
-        set(gca,'Layer','Top');
-        if c==3
-            xlabel("% gait cycle")
-        end
-        if i==1
-            ylabel(cond(1,c),'FontWeight','bold')
-        end
-        %ysecondarylabel("(°)")
+        % nexttile
+        % hold on
+        % rect_color(ti,Y0,Y1,thres,maxd)
+        % for k=1:2
+        %     plot(0:1:100,CRPm{c,gpaire(i,k)}(1,:),'Color',cms(gpaire(i,k),:),'LineWidth',2.5)
+        %     f=fill([0:1:100 100:-1:0],[(CRPm{c,gpaire(i,k)}(1,:)+CRPm{c,gpaire(i,k)}(2,:)) fliplr((CRPm{c,gpaire(i,k)}(1,:)-CRPm{c,gpaire(i,k)}(2,:)))],'c');
+        %     f.FaceColor=cms(gpaire(i,k),:);
+        %     f.EdgeColor='none';
+        %     f.FaceAlpha=0.3;
+        %     ax=gca;
+        %     ax.FontSize=11;
+        % end
+        % if idms==1
+        %     ylim([0 180])
+        %     legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','southeast','Fontsize',15)
+        % else
+        %     ylim([0 40])
+        %     legend(group(1,gpaire(i,1)),"",group(1,gpaire(i,2)),"",'Location','northeast','Fontsize',11)
+        % end
+        % box on
+        % set(gca,'Layer','Top');
+        % if c==3
+        %     xlabel("% gait cycle")
+        % end
+        % if i==1
+        %     ylabel(cond(1,c),'FontWeight','bold')
+        % end
+        % %ysecondarylabel("(°)")
     end
 end
-if exist('cms_d.mat','file')==2
-    load cms_d.mat cms_d
-    cms_d=brighten(cms_d,.4);
-    if maxd~=3
-        cms_d=interp1(1:300,cms_d,linspace(1,300,maxd*100),'spline');
-    end
-else
-    cms_d=colormap(turbo(300));
-    cms_d=brighten(cms_d,.6);
-end
-colormap(cms_d);
-cb=colorbar;
-clim([0 maxd])
-cb.Layout.Tile='east';
-ylabel(cb,"Cohen's d",'FontSize',15)
-cb.FontSize=11;
-if paire==1 && idms==1
-    title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
-elseif paire==1 && idms==0
-    title(tl,"Post-Hoc tests - Knee/Hip DP",'FontWeight','bold')
-elseif paire==2 && idms==1
-    title(tl,"Post-Hoc tests - Ankle/Knee MARP",'FontWeight','bold')
-elseif paire==2 && idms==0
-    title(tl,"Post-Hoc tests - Ankle/Knee DP",'FontWeight','bold')
-end
-tl.Padding = 'compact'; tl.TileSpacing = 'compact';
+% if exist('cms_d.mat','file')==2
+%     load cms_d.mat cms_d
+%     cms_d=brighten(cms_d,.4);
+%     if maxd~=3
+%         cms_d=interp1(1:300,cms_d,linspace(1,300,maxd*100),'spline');
+%     end
+% else
+%     cms_d=colormap(turbo(300));
+%     cms_d=brighten(cms_d,.6);
+% end
+% colormap(cms_d);
+% cb=colorbar;
+% clim([0 maxd])
+% cb.Layout.Tile='east';
+% ylabel(cb,"Cohen's d",'FontSize',15)
+% cb.FontSize=11;
+% if paire==1 && idms==1
+%     title(tl,"Post-Hoc tests - Knee/Hip MARP",'FontWeight','bold')
+% elseif paire==1 && idms==0
+%     title(tl,"Post-Hoc tests - Knee/Hip DP",'FontWeight','bold')
+% elseif paire==2 && idms==1
+%     title(tl,"Post-Hoc tests - Ankle/Knee MARP",'FontWeight','bold')
+% elseif paire==2 && idms==0
+%     title(tl,"Post-Hoc tests - Ankle/Knee DP",'FontWeight','bold')
+% end
+% tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 
 function d=cohensd(ti,Y0,Y1,thres)
@@ -495,15 +495,15 @@ function d=cohensd(ti,Y0,Y1,thres)
         ind=1;
 
         for b=b_inf+1:b_sup+1
-    
+
             mY0=mean(Y0(:,b));                                              % Mean of the distribution
             sY0=std(Y0(:,b));                                               % Standard deviation
             nY0=size(Y0(:,b),1);                                            % Sample size
-    
+
             mY1=mean(Y1(:,b));
             sY1=std(Y1(:,b));
             nY1=size(Y1(:,b),1);
-    
+
             s_pooled=sqrt(((sY0^2*(nY0-1))+(sY1^2*(nY1- 1)))/(nY0+nY1-2));
             dtemp(ind)=abs(mY1-mY0)/s_pooled;                               % Effect size (Cohen's d)
             ind=ind+1;
@@ -664,10 +664,10 @@ clear
 clc
 
 paire=2; % 1 : Knee/Hip, 2 : Ankle/Knee
-idms=1;  % 1 : MARP, 0 : DP
-maxd=3;  % Max effect size displayed on colorbar
+idms=0;  % 1 : MARP, 0 : DP
+maxd=4;  % Max effect size displayed on colorbar
 thres=0; % Min size of displayed clusters
-lw=2;  % LineWidth
+lw=2;    % LineWidth
 
 load PA_CRP.mat
 load participants.mat
@@ -702,10 +702,13 @@ for i=1:3
     end
 end
 
-f=figure;
+%%
+
+figure;
 tl=tiledlayout(3,4);
 c=[1 2 3];
 cpaire=nchoosek(c,2);                                                       % Paires de conditions
+cpaire([end-1 end],:)=cpaire([end end-1],:);
 cms=colormap(nebula(3));
 cms=brighten(cms,-.2);
 lns=["-","--",":"];
@@ -739,6 +742,9 @@ for i=1:3
         if idms==1
             ylim([0 180])
             yticks([0 90 180])
+        elseif idms==0 && paire==1
+            ylim([0 40])
+            yticks([0 20 40])
         else
             ylim([0 60])
             yticks([0 30 60])
@@ -747,16 +753,16 @@ for i=1:3
         set(gca,'Layer','Top');
         xticks([0 20 40 60 80 100])
         if i==3
-            xlabel("% gait cycle",'Fontsize',11)
+            xlabel("% gait cycle",'Fontsize',13)
         end
         ysecondarylabel("(°)")
         if g==1
             if i==1
-                ylabel("Even vs Moderately uneven",'FontWeight','bold')
+                ylabel("Even / Moderately uneven",'FontWeight','bold')
             elseif i==2
-                ylabel("Even vs Highly uneven",'FontWeight','bold')
+                ylabel("Even / Highly uneven",'FontWeight','bold')
             else
-                ylabel("Moderately vs Highly uneven",'FontWeight','bold')
+                ylabel("Moderately / Highly uneven",'FontWeight','bold')
             end
         end
         % if g==1
@@ -792,23 +798,26 @@ cb=colorbar;
 clim([0 maxd])
 cb.Layout.Tile='east';
 cb.FontSize=12;
-ylabel(cb,"Cohen's d",'FontSize',12)
-if paire==1 && idms==1
-    title(tl,"Knee/Hip MARP - Surface comparisons",'FontWeight','bold','FontSize',14)
-elseif paire==1 && idms==0
-    title(tl,"Knee/Hip DP - Surface comparisons",'FontWeight','bold','FontSize',14)
-elseif paire==2 && idms==1
-    title(tl,"Ankle/Knee MARP - Surface comparisons",'FontWeight','bold','FontSize',14)
-elseif paire==2 && idms==0
-    title(tl,"Ankle/Knee DP - Surface comparisons",'FontWeight','bold','FontSize',14)
-end
+ylabel(cb,"Cohen's d",'FontSize',14)
+% if paire==1 && idms==1
+%     title(tl,"Knee/Hip MARP - Surface comparisons",'FontWeight','bold','FontSize',14)
+% elseif paire==1 && idms==0
+%     title(tl,"Knee/Hip DP - Surface comparisons",'FontWeight','bold','FontSize',14)
+% elseif paire==2 && idms==1
+%     title(tl,"Ankle/Knee MARP - Surface comparisons",'FontWeight','bold','FontSize',14)
+% elseif paire==2 && idms==0
+%     title(tl,"Ankle/Knee DP - Surface comparisons",'FontWeight','bold','FontSize',14)
+% end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
-
 lg=legend(h(:),'orientation','horizontal','box','off','FontSize',14);
 lg.Layout.Tile = 'South';
 lg.IconColumnWidth = 60;
+fontname(gcf, 'Times New Roman')
+
+%%
 
 figure
+set(gca, 'FontName', 'Times New Roman')
 tl=tiledlayout(3,6);
 g=[1 2 3 4];
 gpaire=nchoosek(g,2);
@@ -848,6 +857,9 @@ for c=1:3
         if idms==1
             ylim([0 180])
             yticks([0 90 180])
+        elseif idms==0 && paire==1
+            ylim([0 40])
+            yticks([0 20 40])
         else
             ylim([0 60])
             yticks([0 30 60])
@@ -856,10 +868,10 @@ for c=1:3
         set(gca,'Layer','Top');
         xticks([0 20 40 60 80 100])
         if c==1
-            title(grouptl(gpaire(i,1))+" vs "+grouptl(gpaire(i,2)),FontSize=12)
+            title(grouptl(gpaire(i,1))+" / "+grouptl(gpaire(i,2)),FontSize=12)
         end
         if c==3
-            xlabel("% gait cycle",'Fontsize',11)
+            xlabel("% gait cycle",'Fontsize',13)
         end
         if i==1
             ylabel(condtl(1,c),'FontWeight','bold')
@@ -881,40 +893,42 @@ colormap(cms_d);
 cb=colorbar;
 clim([0 maxd])
 cb.Layout.Tile='east';
-ylabel(cb,"Cohen's d",'FontSize',12)
+ylabel(cb,"Cohen's d",'FontSize',14)
 cb.FontSize=12;
-if paire==1 && idms==1
-    title(tl,"Knee/Hip MARP - Group comparisons",'FontWeight','bold','FontSize',14)
-elseif paire==1 && idms==0
-    title(tl,"Knee/Hip DP - Group comparisons",'FontWeight','bold','FontSize',14)
-elseif paire==2 && idms==1
-    title(tl,"Ankle/Knee MARP - Group comparisons",'FontWeight','bold','FontSize',14)
-elseif paire==2 && idms==0
-    title(tl,"Ankle/Knee DP - Group comparisons",'FontWeight','bold','FontSize',14)
-end
+% if paire==1 && idms==1
+%     title(tl,"Knee/Hip MARP - Group comparisons",'FontWeight','bold','FontSize',14)
+% elseif paire==1 && idms==0
+%     title(tl,"Knee/Hip DP - Group comparisons",'FontWeight','bold','FontSize',14)
+% elseif paire==2 && idms==1
+%     title(tl,"Ankle/Knee MARP - Group comparisons",'FontWeight','bold','FontSize',14)
+% elseif paire==2 && idms==0
+%     title(tl,"Ankle/Knee DP - Group comparisons",'FontWeight','bold','FontSize',14)
+% end
 tl.Padding = 'compact'; tl.TileSpacing = 'compact';
 
 lg=legend(h(:),'orientation','horizontal','box','off','FontSize',14);
 lg.Layout.Tile = 'South';
 lg.IconColumnWidth = 60;
+fontname(gcf, 'Times New Roman')
 
 %% Raincloud plots
 
-clear
-load sil.mat
+%clear
+load STR.mat
 load participants.mat
 
-nbp=size(sil,2);
+nbp=size(STR,2);
 
 ind=ones(3,4);
 Data=cell(1,4);
 for p=1:nbp
-    if isempty(sil{1,p})
+    if isempty(STR{1,p})
         continue
     end
     idg=participants{p,3};
     for c=1:3
-        Data{1,5-idg}(ind(c,idg),c)=sil{c,p};
+        Data{1,5-idg}(ind(c,idg),c)=sum(STR{c,p}(:,1))/420;
+        %Data{1,5-idg}(ind(c,idg),c)=Mod{c,p};
         ind(c,idg)=ind(c,idg)+1;
     end
 end
@@ -929,12 +943,15 @@ h = daviolinplot(Data,'colors',cms,'box',3,...
     'scattersize',25,'scatteralpha',0.5,'linkline',1,...
     'xtlabels', condition, 'violinalpha',.5, 'violinwidth',1.1,...
     'legend',group,'outliers',0, 'boxwidth',1, 'boxspacing',.95); 
-ylabel('Modularity');
-xl = xlim; xlim([xl(1), xl(2)+0.05]);
-ylim([.16 , .74])
+ylabel('Density');
+xl = xlim; xlim([xl(1), xl(2)+.05]);
+yl =ylim; ylim([yl(1) , yl(2)]);
 set(h.sc,'MarkerEdgeColor','none');
-set(gca,'FontSize',12);
+set(gca,'FontSize',14);
+set(gca, 'FontName', 'Times New Roman')
 box on
+%%
+exportgraphics(gcf,"Fig 10.pdf",ContentType="vector")
 
 %% Kinectomes moyens par condition (groupe au choix)
 
@@ -982,8 +999,8 @@ f=figure;
 tl=tiledlayout(2,2);
 markers={'HEAD' 'C7' 'T10' 'LSHO' 'LELB' 'LFIN' 'RSHO' 'RELB' 'RFIN' ...
 'LASI' 'RASI' 'LTHI' 'LKNE' 'LTIB' 'LANK' 'LTOE' 'RTHI' 'RKNE' 'RTIB' 'RANK' 'RTOE'};
-cond=["Even" "Medium" "Surface irrégulière"];
-group=["Adultes" "Adolescents" "Enfants" "Jeunes enfants"];
+cond=["Even" "Moderately uneven" "Highly uneven"];
+group=["Adults" "Adolescents" "Children" "Young children"];
 S=[1 1 1 1 2 2 1 3 3 1 1 3 3 3 3 3 2 2 2 2 2];
 [~,I]=sort(S);
 markers_sort=markers(I);
@@ -991,7 +1008,7 @@ markers_sort=markers(I);
 for g=1:4
     nexttile
     ktemp=Kinect_mean{c,g}(I,I);
-    h(g)=heatmap(markers_sort,markers_sort,ktemp,'Colormap',parula,'ColorbarVisible','off','CellLabelColor','none');
+    h(g)=heatmap(markers_sort,markers_sort,ktemp,'Colormap',parula,'ColorbarVisible','off','CellLabelColor','none','FontSize',13);
     title(group(1,g));
 end
 fontsize(13,"points")
@@ -1003,7 +1020,8 @@ ax=axes(tl,'visible','off','Colormap',h(1).Colormap,'CLim',globalColorLim);
 cb=colorbar(ax);
 cb.Layout.Tile = 'East';
 cb.FontSize=13;
-ylabel(cb,"Corrélation",'FontSize',13)
-ylabel(tl, "Marqueurs",'FontWeight','bold')
-title(tl, sprintf("Kinectomes moyens - %s", cond(1,c)))
-tl.Padding = 'compact';% tl.TileSpacing = 'compact';
+ylabel(cb,"Correlation",'FontWeight','bold','FontSize',13)
+ylabel(tl, "Markers",'FontWeight','bold','FontSize',13)
+%title(tl, sprintf("Mean kinectomes - %s", cond(1,c)))
+tl.Padding = 'compact'; tl.TileSpacing = 'compact';
+fontname("Times New Roman")
